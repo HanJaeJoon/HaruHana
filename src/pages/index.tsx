@@ -10,33 +10,44 @@ const Home: NextPage = () => {
   if (status === "loading") {
     return <main>Loading...</main>;
   }
-  
+
+  if (session) {
+    return (
+      <>
+        <p>hi {session.user?.name}</p>
+        <button
+          onClick={() => {
+            signOut().catch(console.log);
+          }}
+        >
+          Logout
+        </button>
+      </>
+    );
+  }
+
   return (
     <>
       <main>
         <h1>todo</h1>
-      <div>
-        {session ? (
-          <>
-            <p>hi {session.user?.name}</p>
-            <button
-              onClick={() => {
-                signOut().catch(console.log);
-              }}
-            >
-              Logout
-            </button>
-          </>
-        ) : (
+        <div>
           <button
             onClick={() => {
               signIn("google").catch(console.log);
             }}
           >
             Login with Google
-           </button>
-        )}
-      </div>
+          </button>
+        </div>
+        <div>
+          <button
+            onClick={() => {
+              signIn("github").catch(console.log);
+            }}
+          >
+            Login with GitHub
+          </button>
+        </div>
       </main>
     </>
   );
