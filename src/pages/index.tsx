@@ -11,6 +11,14 @@ const Home: NextPage = () => {
     return <main>Loading...</main>;
   }
 
+  const test = 1;
+
+  console.log(1)
+
+  if (test) {
+    console.log(test + 1)
+  }
+
   if (session) {
     return (
       <>
