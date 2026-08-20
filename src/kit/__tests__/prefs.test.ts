@@ -27,6 +27,16 @@ describe('createPrefs', () => {
     expect(await prefs.load()).toBeNull();
   });
 
+  it('remove 하면 값이 사라진다', async () => {
+    await prefs.save({ name: 'a', count: 1 });
+    await prefs.remove();
+    expect(await prefs.load()).toBeNull();
+  });
+
+  it('없는 값을 remove 해도 실패하지 않는다', async () => {
+    await expect(prefs.remove()).resolves.toBeUndefined();
+  });
+
   it('검증에 실패하는 값이 저장돼 있으면 null을 반환한다', async () => {
     await AsyncStorage.setItem('test:sample', JSON.stringify({ name: 'a' }));
     expect(await prefs.load()).toBeNull();

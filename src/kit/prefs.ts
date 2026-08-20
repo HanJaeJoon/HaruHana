@@ -4,11 +4,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export function createPrefs<T>(
   storageKey: string,
   isValid: (value: unknown) => value is T
-): { save(value: T): Promise<void>; load(): Promise<T | null> } {
+): { save(value: T): Promise<void>; load(): Promise<T | null>; remove(): Promise<void> } {
   return {
     async save(value: T): Promise<void> {
       try {
         await AsyncStorage.setItem(storageKey, JSON.stringify(value));
+      } catch {
+        // 무시
+      }
+    },
+    async remove(): Promise<void> {
+      try {
+        await AsyncStorage.removeItem(storageKey);
       } catch {
         // 무시
       }
