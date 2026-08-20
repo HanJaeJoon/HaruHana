@@ -26,6 +26,40 @@ jobs:
           # versionCode 가드가 vc* 태그를 읽어야 하므로 전체 이력을 가져온다
           fetch-depth: 0
 
+      # 서명 시크릿은 빌드 맨 뒤에서야 쓰인다. 없으면 25분을 태우고 마지막에
+      # 실패하므로 여기서 먼저 막는다. 값은 출력하지 않고 열리는지만 본다.
+      - name: Guard signing secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          MISSING=
+          for NAME in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            eval "VALUE=\$$NAME"
+            [ -n "$VALUE" ] || MISSING="$MISSING $NAME"
+          done
+          if [ -n "$MISSING" ]; then
+            echo "::error::등록되지 않은 저장소 시크릿:$MISSING (Settings > Secrets and variables > Actions)"
+            exit 1
+          fi
+          # keytool 이 없는 러너에서는 존재 확인까지만 하고 넘어간다.
+          if ! command -v keytool > /dev/null 2>&1; then
+            echo "::warning::keytool 이 없어 키스토어 열기 검사를 건너뜁니다."
+            exit 0
+          fi
+          PROBE="$RUNNER_TEMP/probe.jks"
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$PROBE" 2>/dev/null || true
+          OK=1
+          keytool -list -keystore "$PROBE" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" > /dev/null 2>&1 || OK=0
+          rm -f "$PROBE"
+          if [ "$OK" = "0" ]; then
+            echo "::error::키스토어를 열지 못했습니다. ANDROID_KEYSTORE_BASE64 / ANDROID_KEYSTORE_PASSWORD / ANDROID_KEY_ALIAS 를 확인하세요."
+            exit 1
+          fi
+          echo "서명 시크릿 4개 확인 완료"
+
       - uses: actions/setup-node@v4
         with:
           # react-native 0.86 의 engines 는 ^20.19.4 || ^22.13.0 || ^24.3.0 || >=25 다
