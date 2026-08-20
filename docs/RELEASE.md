@@ -45,7 +45,7 @@ HaruHana 는 위 자산을 `scripts/make-icons.py` 로 만든다 (무채색 도�
 
 ## 1. GitHub 저장소
 
-- [ ] 저장소 생성 (Public 권장 - Actions 분 무제한)
+- [ ] 저장소 생성 (**Public 권장** - Actions 분 무제한. Private 은 계정 전체 월 2,000분을 공유해 릴리스 빌드 약 25분 기준 월 80회가 한계다. 또한 Public -> Private 전환은 star/watcher 를 제거하고 되돌려도 복구되지 않으며, 브랜치 보호 규칙도 사라진다)
 - [ ] 코드 push, 기본 브랜치는 `main`
 
 `workflow_dispatch` 워크플로는 **기본 브랜치에 파일이 있어야** Actions UI 목록에 나온다. 작업 브랜치에만 있으면 실행 버튼이 보이지 않는다.

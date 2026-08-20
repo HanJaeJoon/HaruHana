@@ -194,7 +194,11 @@ Array<{ goal: Goal, records: Record[], closedAt: string, outcome: 'achieved' | '
 3. **[완료]** 쓰지 않는 kit 모듈(currency/chart/share)과 의존성 제거, `expo-notifications` 설치, `npm ci` 통과 확인. 배너는 index에서 루트 레이아웃으로 옮겨 전 화면 공통으로 만들었다 (3절 화면 구성대로)
    - 예상대로 개별 설치가 락파일을 깨뜨려(`@emnapi/*` EUSAGE) 락파일과 `node_modules` 전체 재설치로 복구
    - 락파일 재생성이 드러낸 별건: `react-test-renderer: ^19.2.3`이 19.2.8로 올라가며 `react ^19.2.8`을 요구하는데 Expo SDK 57이 react를 19.2.3에 고정해 ERESOLVE. 양쪽 저장소 모두 `19.2.3` 정확 고정으로 해결 (starter에 역전파)
-4. **[완료]** 저장소 Public -> Private 전환. Actions 분이 계정 전체 월 2,000분 공유가 되므로 릴리스 빌드(약 25분) 기준 월 80회가 한계다 - 빌드를 남발하지 않도록 주의
+4. **[철회] 저장소는 Public 으로 둔다** (2026-08-20 재결정). Private 으로 한 번 바꿨다가 되돌렸다. 근거:
+   - Actions 분이 Public 은 무제한, Private 은 계정 전체 월 2,000분 공유다. 릴리스 빌드가 약 25분이라 월 80회가 한계이고 그 한도를 starter/다른 앱과 나눠 쓴다
+   - Private 이면 저장소 URL 이 외부에서 404 가 되고 star 를 준 사람의 목록에서도 사라진다
+   - 서명 키와 AdMob 실 단위 ID 는 Actions Secrets 와 로컬에만 있어 소스 공개로 새는 것이 없다
+   - 되돌려 얻지 못한 것: Private 전환 시 star 1개가 제거되고 복구되지 않았다. main 의 브랜치 보호 규칙도 함께 사라졌다
 5. **[완료]** 데이터 계층: prefs 4키 + isValid + 파생값 계산 함수. 테스트 먼저 작성
    - `dates.ts`(로컬 YYYY-MM-DD 문자열 취급), `model.ts`(형+가드), `records.ts`(누적/월 밀도/수정 가능 범위), `store.ts`(4키), `calendar.ts`(달력 그리드), `habit.ts`(목표 시작/종료)
    - `kit/prefs`에 `remove()`를 추가했다 (목표 종료 시 활성 목표 키를 지워야 하는데 save/load 만으로는 "값 없음"을 만들 수 없었다). starter 로 역전파 완료
