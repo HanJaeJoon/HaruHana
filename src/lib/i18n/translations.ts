@@ -70,6 +70,8 @@ type Strings = {
   settingsOneThing: string;
   settingsOneThingSave: string;
   settingsNotification: string;
+  settingsNotificationCurrent: string;
+  settingsNotificationCurrentOff: string;
   settingsNotificationOff: string;
   settingsGoalSection: string;
   settingsAchieved: string;
@@ -149,7 +151,9 @@ export const translations: Record<AppLocale, Strings> = {
     settingsOneThing: '오늘의 하나 문구',
     settingsOneThingSave: '문구 저장',
     settingsNotification: '알림 시각',
-    settingsNotificationOff: '알림 끄기',
+    settingsNotificationCurrent: '매일 %{value}에 알립니다.',
+    settingsNotificationCurrentOff: '지금은 알림을 쓰지 않습니다.',
+    settingsNotificationOff: '알림 없음',
     settingsGoalSection: '목표 마치기',
     settingsAchieved: '달성했다',
     settingsClose: '마감',
@@ -226,7 +230,9 @@ export const translations: Record<AppLocale, Strings> = {
     settingsOneThing: 'Wording of your one thing',
     settingsOneThingSave: 'Save wording',
     settingsNotification: 'Reminder time',
-    settingsNotificationOff: 'Turn reminders off',
+    settingsNotificationCurrent: 'Reminding you every day at %{value}.',
+    settingsNotificationCurrentOff: 'Reminders are off right now.',
+    settingsNotificationOff: 'No reminders',
     settingsGoalSection: 'Finish this goal',
     settingsAchieved: 'Achieved it',
     settingsClose: 'Close it',

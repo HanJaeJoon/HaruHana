@@ -14,6 +14,10 @@ import { PressButton } from '@/components/PressButton';
 
 const PRESET_TIMES = ['07:00', '08:00', '09:00'] as const;
 
+function isPreset(time: string): boolean {
+  return (PRESET_TIMES as readonly string[]).includes(time);
+}
+
 export default function Settings() {
   const colors = useThemeColors(THEME_OVERRIDES);
   const accent = useAccent();
@@ -22,7 +26,8 @@ export default function Settings() {
   const { status, goal, settings, updateOneThing, setNotificationTime, finishGoal } = useHabit();
 
   const [draft, setDraft] = useState(goal?.oneThing ?? '');
-  const [customTime, setCustomTime] = useState('');
+  // null 이면 아직 입력 칸을 건드리지 않은 것이다 - 그동안은 저장된 값을 그대로 비춘다.
+  const [customTime, setCustomTime] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<Outcome | null>(null);
 
   if (status === 'loading') {
@@ -31,6 +36,10 @@ export default function Settings() {
   if (status === 'onboarding' || !goal) {
     return <Redirect href="/onboarding" />;
   }
+
+  // 프리셋에 없는 시각으로 설정돼 있으면 입력 칸이 그 값을 보여준다.
+  const savedCustom =
+    settings.notificationTime !== null && !isPreset(settings.notificationTime) ? settings.notificationTime : '';
 
   const finish = async (outcome: Outcome) => {
     await finishGoal(outcome, today);
@@ -61,6 +70,12 @@ export default function Settings() {
 
       <View style={styles.section}>
         <Text style={[styles.label, { color: colors.faint }]}>{t('settingsNotification')}</Text>
+        {/* 어느 버튼이 채워져 있는지만으로는 "지금 꺼져 있음"과 "누르면 꺼짐"이 구분되지 않는다. */}
+        <Text style={[styles.body, { color: colors.subtext }]}>
+          {settings.notificationTime === null
+            ? t('settingsNotificationCurrentOff')
+            : t('settingsNotificationCurrent', { value: settings.notificationTime })}
+        </Text>
         <View style={styles.list}>
           {PRESET_TIMES.map((time) => (
             <PressButton
@@ -73,7 +88,7 @@ export default function Settings() {
             />
           ))}
           <TextInput
-            value={customTime}
+            value={customTime ?? savedCustom}
             onChangeText={(value) => {
               setCustomTime(value);
               if (isTimeString(value)) setNotificationTime(value);
