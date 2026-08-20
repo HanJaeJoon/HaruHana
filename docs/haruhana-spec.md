@@ -186,12 +186,14 @@ Array<{ goal: Goal, records: Record[], closedAt: string, outcome: 'achieved' | '
 
 선행: microapp-starter 저장소 생성(Phase 3), 대출 상환 계산기로 kit 검증(Phase 4).
 
-1. starter 복제 -> HaruHana 저장소에 새 커밋으로 내용 교체. **이력을 보존하므로 스타터 README의 `rm -rf .git && git init` 절차는 쓰지 않고, `.git`을 제외한 파일 복사로 진행한다** (.NET 코드 제거는 완료). 복사 시 부딪히는 파일 3종:
-   - `.gitignore` - 덮으면 `docs/superpowers/` 줄이 사라진다. 병합할 것
-   - `.github/workflows/` - 스타터의 `build.yml`이 추가되고 기존 `cr.yml`(PR 코드 리뷰 액션)은 남는다. 지울지 결정
-   - `CLAUDE.md`, `AGENTS.md`, `.claude/settings.json` - 스타터에 들어 있어 복사 시 HaruHana에 규칙 파일이 새로 생긴다. 진행 전 확인 필요
-2. 브랜딩 4개 파일 교체 (`src/lib/branding.ts`, `app.json`, `package.json` name, `src/lib/i18n/translations.ts`) + 무채색 accent 배선: `brandColor` 단일 상수를 테마별 accent로 바꾸고, `src/app/index.tsx`가 버튼 배경으로 쓰는 지점을 `useThemeColors` 기반으로 전환 (결정 8). `app.json`의 splash `backgroundColor`와 `adaptiveIcon.backgroundColor`도 무채색으로
-3. 쓰지 않는 kit 모듈(currency/chart/share)과 의존성 제거, `expo-notifications` 설치, `npm ci` 통과 확인
+1. **[완료]** starter 복제 -> HaruHana 저장소에 새 커밋으로 내용 교체 (`.git`을 제외한 파일 복사로 이력 보존). 부딪히는 파일 3종의 처리:
+   - `.gitignore` - starter 것 위에 `docs/superpowers/` 줄을 붙여 병합
+   - `.github/workflows/` - `cr.yml`(PR 코드 리뷰)은 유지하고 starter의 `build.yml`을 추가. 하는 일이 겹치지 않는다
+   - `CLAUDE.md` - starter 것(`@AGENTS.md` 한 줄 + Expo 버전 문서 안내)은 복사하지 않고 HaruHana용으로 새로 씀. 스펙 요약이 아니라 코드에서 어기기 쉬운 제약만 담는다. `AGENTS.md`는 만들지 않고 Expo 문서 항목을 CLAUDE.md에 흡수. `.claude/settings.json`(expo 플러그인 활성화)은 그대로 가져옴
+2. **[완료]** 브랜딩 교체 + 무채색 accent 배선. `brandColor` 단일 상수를 `ACCENT`(테마별) + `useAccent()`로 대체. `app.json`은 name/slug/scheme/package와 splash·adaptiveIcon 배경을 무채색으로 (splash는 다크 변형 추가)
+3. **[완료]** 쓰지 않는 kit 모듈(currency/chart/share)과 의존성 제거, `expo-notifications` 설치, `npm ci` 통과 확인. 배너는 index에서 루트 레이아웃으로 옮겨 전 화면 공통으로 만들었다 (3절 화면 구성대로)
+   - 예상대로 개별 설치가 락파일을 깨뜨려(`@emnapi/*` EUSAGE) 락파일과 `node_modules` 전체 재설치로 복구
+   - 락파일 재생성이 드러낸 별건: `react-test-renderer: ^19.2.3`이 19.2.8로 올라가며 `react ^19.2.8`을 요구하는데 Expo SDK 57이 react를 19.2.3에 고정해 ERESOLVE. 양쪽 저장소 모두 `19.2.3` 정확 고정으로 해결 (starter에 역전파)
 4. 저장소 Public -> Private 전환
 5. 데이터 계층: prefs 4키 + isValid + 파생값 계산 함수 (순수 함수, 단위 테스트 우선)
 6. 오늘 화면 (체크, 어제 프롬프트, 66일 진행 바, 월 밀도)
