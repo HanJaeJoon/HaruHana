@@ -194,12 +194,14 @@ Array<{ goal: Goal, records: Record[], closedAt: string, outcome: 'achieved' | '
 3. **[완료]** 쓰지 않는 kit 모듈(currency/chart/share)과 의존성 제거, `expo-notifications` 설치, `npm ci` 통과 확인. 배너는 index에서 루트 레이아웃으로 옮겨 전 화면 공통으로 만들었다 (3절 화면 구성대로)
    - 예상대로 개별 설치가 락파일을 깨뜨려(`@emnapi/*` EUSAGE) 락파일과 `node_modules` 전체 재설치로 복구
    - 락파일 재생성이 드러낸 별건: `react-test-renderer: ^19.2.3`이 19.2.8로 올라가며 `react ^19.2.8`을 요구하는데 Expo SDK 57이 react를 19.2.3에 고정해 ERESOLVE. 양쪽 저장소 모두 `19.2.3` 정확 고정으로 해결 (starter에 역전파)
-4. 저장소 Public -> Private 전환
-5. 데이터 계층: prefs 4키 + isValid + 파생값 계산 함수 (순수 함수, 단위 테스트 우선)
-6. 오늘 화면 (체크, 어제 프롬프트, 66일 진행 바, 월 밀도)
-7. 온보딩/목표 설정 흐름
-8. 달력, 아카이브, 설정 화면
-9. 로컬 알림
+4. 저장소 Public -> Private 전환 (미착수 - Actions 분 제약과 함께 판단할 것. Private 은 계정 전체 월 2,000분을 공유하고 Android 릴리스 빌드가 약 25분이라 월 80회가 한계다)
+5. **[완료]** 데이터 계층: prefs 4키 + isValid + 파생값 계산 함수. 테스트 먼저 작성
+   - `dates.ts`(로컬 YYYY-MM-DD 문자열 취급), `model.ts`(형+가드), `records.ts`(누적/월 밀도/수정 가능 범위), `store.ts`(4키), `calendar.ts`(달력 그리드), `habit.ts`(목표 시작/종료)
+   - `kit/prefs`에 `remove()`를 추가했다 (목표 종료 시 활성 목표 키를 지워야 하는데 save/load 만으로는 "값 없음"을 만들 수 없었다). starter 로 역전파 완료
+6. **[완료]** 오늘 화면 (체크, 어제 프롬프트, 66일 진행 바, 월 밀도, 66일 축하 1회)
+7. **[완료]** 온보딩/목표 설정 흐름 (계단 -> 영역 -> 목표 -> 오늘의 하나 -> 알림 시각 강제 선택)
+8. **[완료]** 달력, 아카이브, 설정 화면. 상단 탭 내비게이션 추가(온보딩에서는 숨김), 상태는 `HabitProvider`로 루트에 한 번만 둔다
+9. **[완료]** 로컬 알림 (매일 반복, 전부 취소 후 재예약, Android 채널 생성)
 10. 아이콘/스플래시 자산 교체 (무채색 도형) - 템플릿의 Expo 로고 그대로 올리면 심사 반려
 11. 출시 반복 작업 (앱마다 반복되는 체크리스트: 키스토어, Secrets 4개, `EXPECTED_UPLOAD_CERT_SHA256`, AdMob 앱/배너 단위, Play 등록정보 웹사이트 `https://hanjaejoon.github.io`, 콘텐츠 선언, IARC, 출시 후 `git tag vc<N>`)
 
@@ -209,7 +211,7 @@ Array<{ goal: Goal, records: Record[], closedAt: string, outcome: 'achieved' | '
 
 구현 착수 시점에 정할 것이 하나 남았다.
 
-- **달력 UI 구현 방식** - 스타터에 달력 의존성이 없다. 무채색 방침(결정 8)과 "`records` prop 순수 컴포넌트" 제약(결정 10)을 고려하면 자체 구현이 통제하기 쉬우나, 라이브러리 추가와 비교해 착수 시 판단한다
+- **달력 UI 구현 방식** - **자체 구현으로 확정**(2026-08-20). 의존성을 더하지 않고 `calendar.ts`의 순수 함수(`buildMonthGrid`)와 `MonthCalendar` 컴포넌트로 만들었다. 필요한 것이 "해낸 날만 점 하나"뿐이어서 라이브러리의 표현력이 오히려 무채색 방침과 싸운다
 
 그 외 남은 것은 사람 작업뿐이다.
 
