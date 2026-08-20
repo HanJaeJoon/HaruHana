@@ -7,7 +7,7 @@ import { THEME_OVERRIDES, useAccent } from '@/lib/branding';
 import { shiftDays } from '@/lib/dates';
 import { t } from '@/lib/i18n';
 import { findRecord, journeyProgress, monthDensity } from '@/lib/records';
-import { useHabit } from '@/lib/useHabit';
+import { useHabit } from '@/lib/habitContext';
 import { useToday } from '@/lib/useToday';
 
 import { DayCheck } from '@/components/DayCheck';

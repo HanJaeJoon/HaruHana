@@ -52,6 +52,37 @@ type Strings = {
   area_job: string;
   area_business: string;
   area_finance: string;
+  wd0: string;
+  wd1: string;
+  wd2: string;
+  wd3: string;
+  wd4: string;
+  wd5: string;
+  wd6: string;
+  calendarTitle: string;
+  archiveTitle: string;
+  archiveEmpty: string;
+  archiveAchieved: string;
+  archiveClosed: string;
+  archiveDays: string;
+  archivePeriod: string;
+  settingsTitle: string;
+  settingsOneThing: string;
+  settingsOneThingSave: string;
+  settingsNotification: string;
+  settingsNotificationOff: string;
+  settingsGoalSection: string;
+  settingsAchieved: string;
+  settingsClose: string;
+  settingsConfirmAchieved: string;
+  settingsConfirmClose: string;
+  settingsConfirmCancel: string;
+  navToday: string;
+  navCalendar: string;
+  navArchive: string;
+  navSettings: string;
+  notificationBody: string;
+  notificationChannel: string;
 };
 
 export const translations: Record<AppLocale, Strings> = {
@@ -100,6 +131,37 @@ export const translations: Record<AppLocale, Strings> = {
     area_job: '일',
     area_business: '회사',
     area_finance: '재정적 문제',
+    wd0: '일',
+    wd1: '월',
+    wd2: '화',
+    wd3: '수',
+    wd4: '목',
+    wd5: '금',
+    wd6: '토',
+    calendarTitle: '기록',
+    archiveTitle: '지난 목표',
+    archiveEmpty: '아직 마친 목표가 없어요.',
+    archiveAchieved: '달성',
+    archiveClosed: '마감',
+    archiveDays: '%{days}일 해냄',
+    archivePeriod: '%{from} - %{to}',
+    settingsTitle: '설정',
+    settingsOneThing: '오늘의 하나 문구',
+    settingsOneThingSave: '문구 저장',
+    settingsNotification: '알림 시각',
+    settingsNotificationOff: '알림 끄기',
+    settingsGoalSection: '목표 마치기',
+    settingsAchieved: '달성했다',
+    settingsClose: '마감',
+    settingsConfirmAchieved: '이 목표를 달성으로 마칠까요? 기록과 함께 지난 목표로 넘어가고, 새 목표를 정하게 됩니다.',
+    settingsConfirmClose: '이 목표를 마감할까요? 기록과 함께 지난 목표로 넘어가고, 새 목표를 정하게 됩니다.',
+    settingsConfirmCancel: '그만두기',
+    navToday: '오늘',
+    navCalendar: '기록',
+    navArchive: '지난 목표',
+    navSettings: '설정',
+    notificationBody: '오늘의 하나: %{oneThing}',
+    notificationChannel: '오늘의 하나 알림',
   },
   en: {
     tagline: 'One goal this year. One thing today.',
@@ -146,5 +208,36 @@ export const translations: Record<AppLocale, Strings> = {
     area_job: 'Job',
     area_business: 'Business',
     area_finance: 'Finances',
+    wd0: 'Sun',
+    wd1: 'Mon',
+    wd2: 'Tue',
+    wd3: 'Wed',
+    wd4: 'Thu',
+    wd5: 'Fri',
+    wd6: 'Sat',
+    calendarTitle: 'Record',
+    archiveTitle: 'Past goals',
+    archiveEmpty: 'No finished goals yet.',
+    archiveAchieved: 'Achieved',
+    archiveClosed: 'Closed',
+    archiveDays: '%{days} days done',
+    archivePeriod: '%{from} - %{to}',
+    settingsTitle: 'Settings',
+    settingsOneThing: 'Wording of your one thing',
+    settingsOneThingSave: 'Save wording',
+    settingsNotification: 'Reminder time',
+    settingsNotificationOff: 'Turn reminders off',
+    settingsGoalSection: 'Finish this goal',
+    settingsAchieved: 'Achieved it',
+    settingsClose: 'Close it',
+    settingsConfirmAchieved: 'Finish this goal as achieved? It moves to past goals with its record, and you will set a new goal.',
+    settingsConfirmClose: 'Close this goal? It moves to past goals with its record, and you will set a new goal.',
+    settingsConfirmCancel: 'Never mind',
+    navToday: 'Today',
+    navCalendar: 'Record',
+    navArchive: 'Past',
+    navSettings: 'Settings',
+    notificationBody: 'Today, one thing: %{oneThing}',
+    notificationChannel: 'Daily one thing',
   },
 };

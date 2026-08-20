@@ -6,7 +6,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { archiveGoal, newGoal } from './habit';
-import type { Area, DailyRecord, Goal, Outcome, Settings } from './model';
+import type { Area, ArchivedGoal, DailyRecord, Goal, Outcome, Settings } from './model';
+import { syncDailyReminder } from './notifications';
 import { clearRecord, setRecord } from './records';
 import { INITIAL_SETTINGS, archiveStore, goalStore, recordsStore, settingsStore } from './store';
 
@@ -19,24 +20,27 @@ export type NewGoalInput = {
   notificationTime: string | null;
 };
 
-export function useHabit() {
+export function useHabitState() {
   const [loaded, setLoaded] = useState(false);
   const [goal, setGoal] = useState<Goal | null>(null);
   const [records, setRecords] = useState<DailyRecord[]>([]);
   const [settings, setSettings] = useState<Settings>(INITIAL_SETTINGS);
+  const [archive, setArchive] = useState<ArchivedGoal[]>([]);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [savedGoal, savedRecords, savedSettings] = await Promise.all([
+      const [savedGoal, savedRecords, savedSettings, savedArchive] = await Promise.all([
         goalStore.load(),
         recordsStore.load(),
         settingsStore.load(),
+        archiveStore.load(),
       ]);
       if (cancelled) return;
       setGoal(savedGoal);
       setRecords(savedRecords ?? []);
       setSettings(savedSettings ?? INITIAL_SETTINGS);
+      setArchive(savedArchive ?? []);
       setLoaded(true);
     })();
     return () => {
@@ -70,8 +74,10 @@ export function useHabit() {
       const next = { ...goal, oneThing: oneThing.trim() };
       setGoal(next);
       void goalStore.save(next);
+      // 알림 문구에 오늘의 하나가 들어가므로 문구가 바뀌면 다시 예약한다.
+      void syncDailyReminder(settings.notificationTime, next.oneThing);
     },
-    [goal]
+    [goal, settings.notificationTime]
   );
 
   const startGoal = useCallback(
@@ -82,6 +88,7 @@ export function useHabit() {
       setRecords([]);
       setSettings(nextSettings);
       await Promise.all([goalStore.save(next), recordsStore.save([]), settingsStore.save(nextSettings)]);
+      await syncDailyReminder(nextSettings.notificationTime, next.oneThing);
     },
     []
   );
@@ -90,16 +97,19 @@ export function useHabit() {
   const finishGoal = useCallback(
     async (outcome: Outcome, closedAt: string) => {
       if (!goal) return;
-      const archive = (await archiveStore.load()) ?? [];
-      await archiveStore.save([archiveGoal(goal, records, closedAt, outcome), ...archive]);
+      const nextArchive = [archiveGoal(goal, records, closedAt, outcome), ...archive];
+      setArchive(nextArchive);
+      await archiveStore.save(nextArchive);
       // 알림 시각은 사용자의 생활 리듬이므로 목표가 바뀌어도 유지한다. 축하 플래그만 리셋.
       const nextSettings: Settings = { ...settings, celebrated66: false };
       setGoal(null);
       setRecords([]);
       setSettings(nextSettings);
       await Promise.all([goalStore.remove(), recordsStore.save([]), settingsStore.save(nextSettings)]);
+      // 다음 목표를 정하기 전까지는 알릴 것이 없다.
+      await syncDailyReminder(null, '');
     },
-    [goal, records, settings]
+    [goal, records, settings, archive]
   );
 
   const markCelebrated = useCallback(() => {
@@ -108,8 +118,11 @@ export function useHabit() {
   }, [settings, putSettings]);
 
   const setNotificationTime = useCallback(
-    (notificationTime: string | null) => putSettings({ ...settings, notificationTime }),
-    [settings, putSettings]
+    (notificationTime: string | null) => {
+      putSettings({ ...settings, notificationTime });
+      void syncDailyReminder(notificationTime, goal?.oneThing ?? '');
+    },
+    [settings, putSettings, goal]
   );
 
   const status: HabitStatus = !loaded ? 'loading' : goal ? 'ready' : 'onboarding';
@@ -119,6 +132,7 @@ export function useHabit() {
     goal,
     records,
     settings,
+    archive,
     mark,
     unmark,
     updateOneThing,

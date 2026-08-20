@@ -7,7 +7,7 @@ import { useThemeColors, type ThemeColors } from '@/kit/theme';
 import { THEME_OVERRIDES, useAccent } from '@/lib/branding';
 import { t } from '@/lib/i18n';
 import { AREAS, isTimeString, type Area } from '@/lib/model';
-import { useHabit } from '@/lib/useHabit';
+import { useHabit } from '@/lib/habitContext';
 import { useToday } from '@/lib/useToday';
 
 import { PressButton } from '@/components/PressButton';
