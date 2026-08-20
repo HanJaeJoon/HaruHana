@@ -112,7 +112,7 @@
 
 ## 5. 데이터 모델 (kit `createPrefs` 위에서)
 
-`kit/prefs.ts`는 키당 단일 JSON 값을 저장하므로 **키를 4개로 분리**한다:
+`kit/prefs.ts`는 키당 단일 JSON 값을 저장하므로 **키를 5개로 분리**한다:
 
 ```ts
 // haruhana.goal - 활성 목표 (없으면 null)
@@ -127,11 +127,15 @@ Array<{ goal: Goal, records: Record[], closedAt: string, outcome: 'achieved' | '
 
 // haruhana.settings
 { notificationTime: string | null /* 'HH:mm', null = 꺼짐 */, celebrated66: boolean }
+
+// haruhana.onboardingDraft - 목표 설정 흐름의 임시 입력값 (흐름이 끝나면 삭제)
+{ step: OnboardingStep, area?: Area, title: string, oneThing: string, notificationTime?: string | null }
 ```
 
 - 파생값(누적 일수, 월 밀도, 66 도달 여부)은 records에서 계산 - 저장 안 함 (불일치 원천 차단). 예외: 축하 1회 노출 플래그(`celebrated66`)만 저장
 - 날짜는 기기 로컬 기준 `YYYY-MM-DD` 문자열. 시간대 이동으로 생기는 극단 케이스는 v1에서 다루지 않음
 - 각 키에 `isValid` 가드 필수 (kit 계약)
+- `onboardingDraft`는 파생값이 아니라 사용자가 쓴 입력이다. 흐름 도중 앱을 나갔다 와도 이어서 쓰게 하려고 단계마다 저장하고, [시작하기]로 목표가 만들어지는 순간 삭제한다 (에뮬레이터 확인 2026-08-20에서 나온 요구)
 
 ## 6. 로컬 알림 (앱 코드로 구현, kit 승격 보류)
 

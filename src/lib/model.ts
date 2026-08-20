@@ -39,6 +39,24 @@ export type Settings = {
   celebrated66: boolean;
 };
 
+/** 목표 설정 흐름의 단계. 임시 저장한 진행 지점을 복원하는 데도 쓴다. */
+export const ONBOARDING_STEPS = ['stairs', 'area', 'goal', 'oneThing', 'notify'] as const;
+export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
+
+/**
+ * 목표 설정 흐름의 임시 입력값. 목표를 시작하면 지운다.
+ *
+ * 파생값이 아니라 사용자가 직접 쓴 입력이므로 저장한다 (결정: 파생값 저장 금지의
+ * 대상이 아니다). notificationTime 이 없는 것은 아직 고르지 않은 상태다.
+ */
+export type OnboardingDraft = {
+  step: OnboardingStep;
+  area?: Area;
+  title: string;
+  oneThing: string;
+  notificationTime?: string | null;
+};
+
 export function isGoal(value: unknown): value is Goal {
   const v = asRecord(value);
   if (!v) return false;
@@ -76,6 +94,20 @@ export function isSettings(value: unknown): value is Settings {
   if (!v) return false;
   if (typeof v.celebrated66 !== 'boolean') return false;
   return v.notificationTime === null || isTimeString(v.notificationTime);
+}
+
+export function isOnboardingStep(value: unknown): value is OnboardingStep {
+  return typeof value === 'string' && (ONBOARDING_STEPS as readonly string[]).includes(value);
+}
+
+export function isOnboardingDraft(value: unknown): value is OnboardingDraft {
+  const v = asRecord(value);
+  if (!v) return false;
+  if (!isOnboardingStep(v.step)) return false;
+  if (typeof v.title !== 'string' || typeof v.oneThing !== 'string') return false;
+  if (v.area !== undefined && !isArea(v.area)) return false;
+  if (v.notificationTime !== undefined && v.notificationTime !== null && !isTimeString(v.notificationTime)) return false;
+  return true;
 }
 
 /** 'HH:mm' 24시간 표기. */

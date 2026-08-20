@@ -1,22 +1,25 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useThemeColors, type ThemeColors } from '@/kit/theme';
 
 import { THEME_OVERRIDES, useAccent } from '@/lib/branding';
 import { t } from '@/lib/i18n';
-import { AREAS, isTimeString, type Area } from '@/lib/model';
+import { AREAS, ONBOARDING_STEPS, isTimeString, type Area, type OnboardingStep } from '@/lib/model';
 import { useHabit } from '@/lib/habitContext';
+import { onboardingDraftStore } from '@/lib/store';
 import { useToday } from '@/lib/useToday';
 
 import { PressButton } from '@/components/PressButton';
 
 const PRESET_TIMES = ['07:00', '08:00', '09:00'] as const;
 
-type Step = 'stairs' | 'area' | 'goal' | 'oneThing' | 'notify';
+const ORDER: readonly OnboardingStep[] = ONBOARDING_STEPS;
 
-const ORDER: Step[] = ['stairs', 'area', 'goal', 'oneThing', 'notify'];
+function isPreset(time: string): boolean {
+  return (PRESET_TIMES as readonly string[]).includes(time);
+}
 
 /**
  * 목표 설정 흐름. 첫 실행과 목표 교체가 같은 화면을 쓴다.
@@ -24,6 +27,9 @@ const ORDER: Step[] = ['stairs', 'area', 'goal', 'oneThing', 'notify'];
  * 계단 안내와 영역 제시는 사고 도구이므로 저장하지 않는다 (영역만 태그로 남는다).
  * 알림 시각은 기본값을 두지 않고 선택을 강제한다 - notify 가 undefined 인 동안은
  * 시작 버튼이 잠긴다 (null 은 "알림 없이 쓰기"를 고른 상태다).
+ *
+ * 입력값은 단계마다 임시 저장한다. 흐름 도중 앱을 나갔다 와도 처음부터 다시 쓰지
+ * 않게 하려는 것이고, 목표를 시작하는 순간 임시 저장은 지운다.
  */
 export default function Onboarding() {
   const colors = useThemeColors(THEME_OVERRIDES);
@@ -32,13 +38,45 @@ export default function Onboarding() {
   const router = useRouter();
   const { startGoal } = useHabit();
 
-  const [step, setStep] = useState<Step>('stairs');
+  const [step, setStep] = useState<OnboardingStep>('stairs');
   const [area, setArea] = useState<Area | undefined>();
   const [title, setTitle] = useState('');
   const [oneThing, setOneThing] = useState('');
   const [notify, setNotify] = useState<string | null | undefined>(undefined);
   const [customTime, setCustomTime] = useState('');
   const [customOpen, setCustomOpen] = useState(false);
+  // 임시 저장을 읽기 전에는 화면을 그리지 않는다 (첫 단계가 스쳐 보이지 않게).
+  const [restored, setRestored] = useState(false);
+  // 시작 직후에는 다시 저장하지 않는다 (지운 것을 되살리지 않기 위해).
+  const [starting, setStarting] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const draft = await onboardingDraftStore.load();
+      if (cancelled) return;
+      if (draft) {
+        setStep(draft.step);
+        setArea(draft.area);
+        setTitle(draft.title);
+        setOneThing(draft.oneThing);
+        setNotify(draft.notificationTime);
+        if (typeof draft.notificationTime === 'string' && !isPreset(draft.notificationTime)) {
+          setCustomTime(draft.notificationTime);
+          setCustomOpen(true);
+        }
+      }
+      setRestored(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!restored || starting) return;
+    void onboardingDraftStore.save({ step, area, title, oneThing, notificationTime: notify });
+  }, [restored, starting, step, area, title, oneThing, notify]);
 
   const go = (delta: number) => {
     const next = ORDER[ORDER.indexOf(step) + delta];
@@ -46,12 +84,18 @@ export default function Onboarding() {
   };
 
   const start = async () => {
+    setStarting(true);
+    await onboardingDraftStore.remove();
     await startGoal({ title, oneThing, area, notificationTime: notify ?? null }, today);
     router.replace('/');
   };
 
   const canGoOn =
     step === 'goal' ? title.trim().length > 0 : step === 'oneThing' ? oneThing.trim().length > 0 : true;
+
+  if (!restored) {
+    return <View style={[styles.screen, { backgroundColor: colors.background }]} />;
+  }
 
   return (
     <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={styles.content}>
@@ -216,6 +260,9 @@ function Block({ title, body, colors }: { title: string; body: string; colors: T
 }
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   content: {
     padding: 20,
     gap: 20,

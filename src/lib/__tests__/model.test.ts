@@ -1,4 +1,4 @@
-import { isArchive, isGoal, isRecords, isSettings } from '../model';
+import { isArchive, isGoal, isOnboardingDraft, isRecords, isSettings } from '../model';
 
 const goal = {
   id: 'g1',
@@ -81,5 +81,28 @@ describe('isSettings', () => {
 
   it('celebrated66 이 없으면 거부한다', () => {
     expect(isSettings({ notificationTime: null })).toBe(false);
+  });
+});
+
+describe('isOnboardingDraft', () => {
+  const draft = { step: 'goal', title: '토익 900점', oneThing: '' };
+
+  it('단계와 두 입력이 있으면 통과한다', () => {
+    expect(isOnboardingDraft(draft)).toBe(true);
+    expect(isOnboardingDraft({ ...draft, area: 'body' })).toBe(true);
+  });
+
+  it('아직 고르지 않은 알림 시각(없음)과 꺼짐(null)을 모두 허용한다', () => {
+    expect(isOnboardingDraft({ ...draft, notificationTime: undefined })).toBe(true);
+    expect(isOnboardingDraft({ ...draft, notificationTime: null })).toBe(true);
+    expect(isOnboardingDraft({ ...draft, notificationTime: '07:30' })).toBe(true);
+    expect(isOnboardingDraft({ ...draft, notificationTime: '7:30' })).toBe(false);
+  });
+
+  it('알 수 없는 단계나 깨진 영역은 거부한다', () => {
+    expect(isOnboardingDraft({ ...draft, step: 'summary' })).toBe(false);
+    expect(isOnboardingDraft({ ...draft, area: 'sleep' })).toBe(false);
+    expect(isOnboardingDraft({ title: 'x', oneThing: '' })).toBe(false);
+    expect(isOnboardingDraft(null)).toBe(false);
   });
 });

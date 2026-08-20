@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { archiveStore, goalStore, recordsStore, settingsStore } from '../store';
+import { archiveStore, goalStore, onboardingDraftStore, recordsStore, settingsStore } from '../store';
 
 jest.mock('@react-native-async-storage/async-storage', () =>
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -19,17 +19,19 @@ beforeEach(async () => {
   await AsyncStorage.clear();
 });
 
-describe('저장소 4개', () => {
+describe('저장소 5개', () => {
   it('키가 서로 겹치지 않는다', async () => {
     await goalStore.save(goal);
     await recordsStore.save([{ date: '2026-08-20', done: true }]);
     await archiveStore.save([]);
     await settingsStore.save({ notificationTime: '07:00', celebrated66: false });
+    await onboardingDraftStore.save({ step: 'goal', title: '초안', oneThing: '' });
 
     expect(await goalStore.load()).toEqual(goal);
     expect(await recordsStore.load()).toEqual([{ date: '2026-08-20', done: true }]);
     expect(await archiveStore.load()).toEqual([]);
     expect(await settingsStore.load()).toEqual({ notificationTime: '07:00', celebrated66: false });
+    expect(await onboardingDraftStore.load()).toEqual({ step: 'goal', title: '초안', oneThing: '' });
   });
 
   it('키는 앱 접두사를 쓴다 (다른 마이크로앱과 로그에서 구분)', async () => {
