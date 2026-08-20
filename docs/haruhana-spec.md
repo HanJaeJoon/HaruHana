@@ -135,7 +135,8 @@ Array<{ goal: Goal, records: Record[], closedAt: string, outcome: 'achieved' | '
 
 ## 6. 로컬 알림 (앱 코드로 구현, kit 승격 보류)
 
-- `expo-notifications`, 매일 반복 로컬 알림, 서버 불필요
+- `expo-notifications` (스타터에 없어 추가 설치), 매일 반복 로컬 알림, 서버 불필요
+- `app.json` plugins 등록과 Android 알림 권한 처리가 따라온다. Expo Go에서 로컬 알림이 어디까지 동작하는지는 SDK 57 기준으로 확인 필요 - 광고 배너처럼 개발 빌드가 필요할 수 있다
 - 문구에 오늘의 하나 포함: "오늘의 하나: {문구}" - 문구/시각 변경 시 재스케줄
 - 기본 시각 없음 - 온보딩에서 사용자가 프리셋으로 선택 (결정 9). 설정에서 변경/끄기
 - **kit에 넣지 않는다** - "사용처 1개면 승격하지 않음" 원칙. 두 번째 알림 사용 앱이 나올 때 승격 (설계 세션 확정 사항)
@@ -150,9 +151,11 @@ Array<{ goal: Goal, records: Record[], closedAt: string, outcome: 'achieved' | '
 
 ## 8. 기술 스택 (kit/microapp-starter와 동일)
 
-- Expo SDK 54, TypeScript strict, Jest 29 (jest-expo), ESLint 9 flat config
-- `react-native-google-mobile-ads` 16.3.4 고정
-- kit 모듈 사용: `theme`, `prefs`, `i18n`, `ads/AdBanner`. (currency/chart/share는 이 앱에서 불필요 - 단 66일 진행이나 월 밀도 추이에 chart를 쓸 가능성은 v2 여지로)
+- Expo SDK 57 (`expo ~57.0.14`), React Native 0.86.2, React 19.2.3, TypeScript ~6.0.3 strict, Jest 29 + `jest-expo ~57.0.4`, ESLint 9 flat config
+- `react-native-google-mobile-ads` 16.3.4 **고정** (16.4.0 이상은 GMA SDK 25.4.0이 Kotlin 2.3으로 컴파일돼 RN 0.86의 Kotlin 2.1.20에서 `compileReleaseKotlin` 실패)
+- `tsconfig.json`의 `"types": ["jest", "node"]`는 지우지 않는다 (TypeScript 6은 `@types`를 자동 포함하지 않아 테스트 전역이 전부 미해결이 된다)
+- **kit 모듈은 `theme`, `prefs`, `i18n`, `ads/AdBanner`만 쓴다.** 복제 직후 `currency`, `chart`, `share`를 제거한다 - 함께 정리되는 것: 의존성 `react-native-chart-kit`, `react-native-svg`, `react-native-view-shot`, `expo-media-library`, `expo-sharing`, 테스트 `currency.test.ts` / `decimateLabels.test.ts`, `app.json` plugins의 `expo-sharing` / `expo-media-library`
+- **`expo-notifications`를 추가 설치한다** (스타터에 없음). 개별 `npm install` 후에는 `npm ci`가 실제로 통과하는지 확인할 것 - Windows에서 개별 설치 시 락파일이 깨지는 알려진 함정이 있다 (`microapp-starter/README.md` 참고)
 - 빌드: GitHub Actions (`expo prebuild` + Gradle `bundleRelease`)
 - i18n: ko/en, `createI18n` + `pickSupportedLocale`
 
@@ -183,21 +186,30 @@ Array<{ goal: Goal, records: Record[], closedAt: string, outcome: 'achieved' | '
 
 선행: microapp-starter 저장소 생성(Phase 3), 대출 상환 계산기로 kit 검증(Phase 4).
 
-1. starter 복제 -> HaruHana 저장소에 새 커밋으로 내용 교체 (기존 .NET 코드는 이력에 보존하고 새 커밋으로 교체하기로 확정)
-2. 저장소 Public -> Private 전환
-3. 데이터 계층: prefs 4키 + isValid + 파생값 계산 함수 (순수 함수, 단위 테스트 우선)
-4. 오늘 화면 (체크, 어제 프롬프트, 66일 진행 바, 월 밀도)
-5. 온보딩/목표 설정 흐름
-6. 달력, 아카이브, 설정 화면
-7. 로컬 알림
-8. 아이콘/스플래시 자산 교체 (무채색 도형) - 템플릿의 Expo 로고 그대로 올리면 심사 반려
-9. 출시 반복 작업 (앱마다 반복되는 체크리스트: 키스토어, Secrets 4개, `EXPECTED_UPLOAD_CERT_SHA256`, AdMob 앱/배너 단위, Play 등록정보 웹사이트 `https://hanjaejoon.github.io`, 콘텐츠 선언, IARC, 출시 후 `git tag vc<N>`)
+1. starter 복제 -> HaruHana 저장소에 새 커밋으로 내용 교체. **이력을 보존하므로 스타터 README의 `rm -rf .git && git init` 절차는 쓰지 않고, `.git`을 제외한 파일 복사로 진행한다** (.NET 코드 제거는 완료). 복사 시 부딪히는 파일 3종:
+   - `.gitignore` - 덮으면 `docs/superpowers/` 줄이 사라진다. 병합할 것
+   - `.github/workflows/` - 스타터의 `build.yml`이 추가되고 기존 `cr.yml`(PR 코드 리뷰 액션)은 남는다. 지울지 결정
+   - `CLAUDE.md`, `AGENTS.md`, `.claude/settings.json` - 스타터에 들어 있어 복사 시 HaruHana에 규칙 파일이 새로 생긴다. 진행 전 확인 필요
+2. 브랜딩 4개 파일 교체 (`src/lib/branding.ts`, `app.json`, `package.json` name, `src/lib/i18n/translations.ts`) + 무채색 accent 배선: `brandColor` 단일 상수를 테마별 accent로 바꾸고, `src/app/index.tsx`가 버튼 배경으로 쓰는 지점을 `useThemeColors` 기반으로 전환 (결정 8). `app.json`의 splash `backgroundColor`와 `adaptiveIcon.backgroundColor`도 무채색으로
+3. 쓰지 않는 kit 모듈(currency/chart/share)과 의존성 제거, `expo-notifications` 설치, `npm ci` 통과 확인
+4. 저장소 Public -> Private 전환
+5. 데이터 계층: prefs 4키 + isValid + 파생값 계산 함수 (순수 함수, 단위 테스트 우선)
+6. 오늘 화면 (체크, 어제 프롬프트, 66일 진행 바, 월 밀도)
+7. 온보딩/목표 설정 흐름
+8. 달력, 아카이브, 설정 화면
+9. 로컬 알림
+10. 아이콘/스플래시 자산 교체 (무채색 도형) - 템플릿의 Expo 로고 그대로 올리면 심사 반려
+11. 출시 반복 작업 (앱마다 반복되는 체크리스트: 키스토어, Secrets 4개, `EXPECTED_UPLOAD_CERT_SHA256`, AdMob 앱/배너 단위, Play 등록정보 웹사이트 `https://hanjaejoon.github.io`, 콘텐츠 선언, IARC, 출시 후 `git tag vc<N>`)
 
 ## 11. 잔여 항목
 
 초안의 미확정 4건은 모두 해소됐다 (`design-decisions.md` 결정 9~12): 알림 기본 시각 -> 선택 강제, 아카이브 상세 -> v1 생략(확장 가능하게), 알림 스킵 -> 미지원 확정, 브랜딩 -> 확정값 표.
 
-남은 것은 사람 작업뿐이다.
+구현 착수 시점에 정할 것이 하나 남았다.
+
+- **달력 UI 구현 방식** - 스타터에 달력 의존성이 없다. 무채색 방침(결정 8)과 "`records` prop 순수 컴포넌트" 제약(결정 10)을 고려하면 자체 구현이 통제하기 쉬우나, 라이브러리 추가와 비교해 착수 시 판단한다
+
+그 외 남은 것은 사람 작업뿐이다.
 
 - **아이콘 도형** - 무채색 방침(결정 8)에 맞춘 실제 도형 디자인. `assets/images/` 6개 파일 교체 (규격은 `microapp-starter/docs/RELEASE.md`)
 - **스토어 등록정보 문구** - loan-calculator의 `docs/store-listing/` 형식을 따라 작성
