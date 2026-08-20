@@ -42,8 +42,7 @@
         }
       ],
       "expo-localization",
-      "expo-sharing",
-      "expo-media-library",
+      "expo-notifications",
       [
         "react-native-google-mobile-ads",
         {
