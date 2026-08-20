@@ -1,21 +1,21 @@
 {
   "expo": {
-    "name": "microapp-starter",
-    "slug": "microapp-starter",
+    "name": "HaruHana",
+    "slug": "haruhana",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "microappstarter",
+    "scheme": "haruhana",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
       "supportsTablet": true
     },
     "android": {
-      "package": "com.example.microappstarter",
+      "package": "com.hanjaejoon.haruhana",
       "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#f5f5f5",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -31,9 +31,14 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#f5f5f5",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 76,
+          "dark": {
+            "backgroundColor": "#121212",
+            "image": "./assets/images/splash-icon.png",
+            "imageWidth": 76
+          }
         }
       ],
       "expo-localization",

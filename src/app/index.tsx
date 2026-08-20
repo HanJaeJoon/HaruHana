@@ -23,7 +23,7 @@ import {
 } from '@/kit/share/capture';
 import { useThemeColors } from '@/kit/theme';
 
-import { BRANDING, THEME_OVERRIDES } from '@/lib/branding';
+import { BRANDING, THEME_OVERRIDES, useAccent } from '@/lib/branding';
 import { compoundSeries, yearEndPoints, type CompoundResult } from '@/lib/compound';
 import { appLocale, deviceCurrencyCode, t } from '@/lib/i18n';
 import { inputPrefs } from '@/lib/prefs';
@@ -43,6 +43,7 @@ const DEFAULTS = {
 
 export default function Index() {
   const colors = useThemeColors(THEME_OVERRIDES);
+  const accent = useAccent();
   const { width } = useWindowDimensions();
   const canShare = useShareAvailability();
 
@@ -168,10 +169,10 @@ export default function Index() {
         />
 
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: BRANDING.brandColor }]}
+          style={[styles.button, { backgroundColor: accent.bg }]}
           onPress={calculate}
         >
-          <Text style={styles.buttonText}>{t('calculate')}</Text>
+          <Text style={[styles.buttonText, { color: accent.fg }]}>{t('calculate')}</Text>
         </TouchableOpacity>
       </View>
 
@@ -208,7 +209,7 @@ export default function Index() {
             values={chart.values}
             width={Math.max(width - 64, 240)}
             decimalPlaces={0}
-            brandColor={BRANDING.brandColor}
+            brandColor={accent.bg}
             colors={colors}
             style={styles.chart}
           />
@@ -246,7 +247,7 @@ export default function Index() {
       <View style={styles.offscreen} pointerEvents="none">
         <BrandCard
           ref={cardRef}
-          brandColor={BRANDING.brandColor}
+          brandColor={accent.bg}
           appName={BRANDING.appName}
           footerText={t('shareFooter')}
         >
@@ -387,7 +388,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
