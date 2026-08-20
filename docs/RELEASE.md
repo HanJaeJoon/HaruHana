@@ -29,7 +29,7 @@
 | `assets/images/android-icon-monochrome.png` | 테마 아이콘 (Android 13+) | 432x432 PNG, 단색 실루엣 |
 | `assets/images/splash-icon.png` | 스플래시 로고 | 정사각 PNG, `app.json` 의 `imageWidth` 기준 |
 | `assets/images/favicon.png` | 웹 파비콘 | 48x48 PNG (Android 출시에는 무관) |
-| `assets/expo.icon/` | iOS 아이콘 묶음 | iOS 출시 안 하면 무관 |
+| `assets/images/splash-icon-dark.png` | 다크 테마 스플래시 로고 | 정사각 PNG (밝은 도형) |
 
 Play Console 에 따로 업로드하는 것 (저장소에 두지 않아도 된다):
 
@@ -38,6 +38,10 @@ Play Console 에 따로 업로드하는 것 (저장소에 두지 않아도 된�
 - 스크린샷 최소 2장 (16:9 또는 9:16, 최소 320px)
 
 `app.json` 의 `android.adaptiveIcon.backgroundColor` 를 브랜드 색의 연한 톤으로 맞춰 두면 도형만 바꿔도 통일감이 난다.
+
+HaruHana 는 위 자산을 `scripts/make-icons.py` 로 만든다 (무채색 도형 하나: 테두리 원 +
+가운데 점). 도형을 바꿀 때는 그 스크립트를 고치고 다시 돌리면 7개 파일이 한 번에
+갱신된다. 실제 디자인이 나오면 스크립트째로 교체하거나 지우면 된다.
 
 ## 1. GitHub 저장소
 

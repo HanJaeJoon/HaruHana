@@ -8,7 +8,6 @@
     "scheme": "haruhana",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "supportsTablet": true
     },
     "android": {
@@ -33,11 +32,11 @@
         {
           "backgroundColor": "#f5f5f5",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76,
+          "imageWidth": 120,
           "dark": {
             "backgroundColor": "#121212",
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
+            "image": "./assets/images/splash-icon-dark.png",
+            "imageWidth": 120
           }
         }
       ],
