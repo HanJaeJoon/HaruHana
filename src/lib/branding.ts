@@ -13,9 +13,10 @@ export const BRANDING = {
    * AdMob 배너 광고 단위 ID.
    *
    * null 이면 kit/ads 가 구글 공식 테스트 광고를 띄운다.
-   * 실광고 오클릭은 계정 정지 사유이므로 기본값은 null 로 둔다.
+   * 실제 ID 를 넣어도 __DEV__ 빌드에서는 kit/ads 가 테스트 광고를 쓴다
+   * (실광고 오클릭은 계정 정지 사유).
    */
-  adBannerUnitId: null as string | null,
+  adBannerUnitId: 'ca-app-pub-2903995158289675/7480232822' as string | null,
 
   /** AsyncStorage 키 접두사. 로그에서 어느 앱의 값인지 바로 보이게 둔다. */
   storageKeyPrefix: 'haruhana',
