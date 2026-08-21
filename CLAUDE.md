@@ -46,10 +46,12 @@
   25.4.0 은 Kotlin 2.3 컴파일이라 RN 0.86(Kotlin 2.1.20)에서 빌드가 깨진다
 - `tsconfig.json` 의 `"types": ["jest", "node"]` 를 지우면 안 된다. TypeScript 6 은
   `@types` 를 자동 포함하지 않아 테스트 전역이 전부 미해결이 된다
-- `npm install <패키지>` 를 개별 실행한 뒤에는 **반드시 `npm ci` 가 통과하는지 확인**
-  한다. Windows 개별 설치가 락파일의 optional 바인딩을 지워 Linux CI 가 EUSAGE 로
-  거부하는 함정이 있다. 이 경우 `npm install` 재실행으로는 안 고쳐지고
-  `node_modules` 와 `package-lock.json` 을 지우고 처음부터 설치해야 한다
+- **패키지 매니저는 pnpm 이다 (npm 을 쓰지 말 것).** npm 은 Windows 에서
+  `npm install <패키지>` 개별 실행이 Linux 용 optional 전이 의존(`@emnapi/*`)을
+  락파일에서 지워 CI 의 `npm ci` 가 죽는 문제가 있었다. pnpm 락파일은 플랫폼
+  무관하게 optional 의존을 전부 기록하므로 이 실패 모드가 구조적으로 없다.
+  설정(`nodeLinker: hoisted`, `allowBuilds`)은 `pnpm-workspace.yaml` 에 있다 -
+  pnpm 11 부터 `.npmrc` 의 pnpm 설정은 무시된다
 - Expo Go 에서는 광고 배너가 나오지 않는다 (네이티브 모듈 없음). 광고는 Actions
   빌드에서만 확인된다
 - `android.package` 는 Play 에 한 번 올리면 영구히 바꿀 수 없다 (`com.hanjaejoon.haruhana`)
@@ -58,9 +60,9 @@
 
 | 명령 | 하는 일 |
 |---|---|
-| `npm run typecheck` | `tsc --noEmit` (strict) |
-| `npm run test:ci` | Jest 1회 |
-| `npm run lint` | ESLint (kit 단방향 의존 규칙 포함) |
-| `npx jest src/kit` | kit 테스트만 (경계 확인) |
+| `pnpm run typecheck` | `tsc --noEmit` (strict) |
+| `pnpm run test:ci` | Jest 1회 |
+| `pnpm run lint` | ESLint (kit 단방향 의존 규칙 포함) |
+| `pnpm jest src/kit` | kit 테스트만 (경계 확인) |
 
 완료를 주장하기 전에 위 셋을 실제로 돌리고 출력을 확인한다.

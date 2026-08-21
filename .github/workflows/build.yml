@@ -63,14 +63,17 @@ jobs:
           fi
           echo "서명 시크릿 4개 확인 완료"
 
+      # pnpm 버전은 package.json 의 packageManager 필드에서 읽는다
+      - uses: pnpm/action-setup@v4
+
       - uses: actions/setup-node@v4
         with:
           # react-native 0.86 의 engines 는 ^20.19.4 || ^22.13.0 || ^24.3.0 || >=25 다
           node-version: 22
-          cache: npm
+          cache: pnpm
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       # 빌드에 25분을 쓰기 전에 실패해야 의미가 있으므로 앞쪽에 둔다.
       # 출시 이력은 vc<N> 형식의 git 태그로 기록한다.
@@ -87,14 +90,14 @@ jobs:
           echo "versionCode 검사 통과"
 
       - name: Typecheck
-        run: npm run typecheck
+        run: pnpm run typecheck
 
       - name: Test
-        run: npm run test:ci
+        run: pnpm run test:ci
 
       # kit -> 앱 방향 의존 금지 규칙이 여기서 강제된다 (eslint.config.js)
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
 
       - uses: actions/setup-java@v4
         with:
@@ -106,7 +109,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
 
       - name: Expo prebuild
-        run: npx expo prebuild --platform android --clean
+        run: pnpm expo prebuild --platform android --clean
 
       - name: Restore keystore
         run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"

@@ -39,10 +39,13 @@ src/
 ## 개발
 
 ```bash
-npm ci
-npm run typecheck && npm run test:ci && npm run lint
-npm start
+pnpm install
+pnpm run typecheck && pnpm run test:ci && pnpm run lint
+pnpm start
 ```
+
+pnpm 이 없으면 `corepack enable pnpm` 으로 활성화한다. 버전은 `package.json` 의
+`packageManager` 필드가 고정한다.
 
 광고 배너와 로컬 알림은 Expo Go 에서 확인되지 않는다 (네이티브 모듈). GitHub Actions
 릴리스 빌드로 확인한다.

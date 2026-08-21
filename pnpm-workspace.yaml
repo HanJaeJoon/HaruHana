@@ -1,0 +1,9 @@
+# pnpm 11 부터 nodeLinker 등 핵심 설정은 .npmrc 가 아니라 이 파일에 둔다.
+# isolated 설치는 react-native-google-mobile-ads 등 네이티브 모듈이
+# 호환되지 않을 수 있어 hoisted 로 시작한다 (Expo 공식 가이드의 안전한 기본값).
+nodeLinker: hoisted
+
+# 빌드(postinstall) 스크립트는 기본 차단이라 필요한 것만 허용한다.
+# unrs-resolver 는 eslint-config-expo 가 끌어오며 플랫폼 바인딩을 검증한다.
+allowBuilds:
+  unrs-resolver: true
