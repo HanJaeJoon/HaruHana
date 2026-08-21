@@ -11,7 +11,7 @@
 - [ ] `package.json` 의 `name` 교체
 - [ ] `src/lib/i18n/translations.ts` 번역 교체
 - [ ] `app.json` 의 `android.versionCode` 를 `1` 로 확인
-- [ ] `npm run typecheck && npm run test:ci && npm run lint` 통과
+- [ ] `pnpm run typecheck && pnpm run test:ci && pnpm run lint` 통과
 
 `android.package` 는 Play 에 한 번 올리면 **영구히 바꿀 수 없다.** 여기서 확정한다.
 
