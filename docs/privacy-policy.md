@@ -1,6 +1,6 @@
 # HaruHana - Privacy Policy
 
-> **게시 위치(예정): https://hanjaejoon.github.io/haruhana-privacy/**
+> **게시 위치: https://hanjaejoon.github.io/haruhana-privacy/**
 >
 > 이 파일이 원본이고, Play 에 제출하는 URL 은
 > `HanJaeJoon/HanJaeJoon.github.io` 저장소의 `haruhana-privacy/index.html`
@@ -8,7 +8,8 @@
 > **내용을 고치면 그 저장소의 페이지도 함께 고쳐야 한다.**
 > 게시본은 한국어와 영어를 함께 싣는다.
 >
-> 아직 게시하지 않았다. Play 앱 콘텐츠에 URL 을 넣기 전에 올려야 한다.
+> 2026-08-23 게시 완료. Play 앱 콘텐츠의 개인정보처리방침 URL 로 이 주소를 쓴다.
+> 끝 슬래시가 있어야 한다 (없으면 404).
 
 Last updated: 2026-08-20
 
