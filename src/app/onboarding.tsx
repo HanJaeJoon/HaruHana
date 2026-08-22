@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { AppState, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useThemeColors, type ThemeColors } from '@/kit/theme';
 
@@ -42,7 +42,7 @@ function isPreset(time: string): boolean {
  * 입력값은 단계마다 임시 저장한다. 흐름 도중 앱을 나갔다 와도 처음부터 다시 쓰지
  * 않게 하려는 것이고, 목표를 시작하는 순간 임시 저장은 지운다.
  * 저장은 300ms 디바운스한다 (텍스트 입력이 키 입력마다 저장하지 않게). 대신
- * 단계 이동 시점과 unmount 시점에 flush 해서 마지막 입력이 유실되지 않게 한다.
+ * 단계 이동, 앱 백그라운드 전환, unmount 시점에 flush 해서 마지막 입력이 유실되지 않게 한다.
  */
 export default function Onboarding() {
   const colors = useThemeColors(THEME_OVERRIDES);
@@ -86,28 +86,33 @@ export default function Onboarding() {
     };
   }, []);
 
-  const saveDraft = useMemo(
-    () =>
-      debounce((draft: OnboardingDraft) => {
-        void onboardingDraftStore.save(draft);
-      }, DRAFT_SAVE_DELAY_MS),
-    []
+  const saveDraftRef = useRef(
+    debounce((draft: OnboardingDraft) => {
+      void onboardingDraftStore.save(draft);
+    }, DRAFT_SAVE_DELAY_MS)
   );
 
   useEffect(() => {
     if (!restored || starting) return;
-    saveDraft({ step, area, title, oneThing, notificationTime: notify });
-  }, [saveDraft, restored, starting, step, area, title, oneThing, notify]);
+    saveDraftRef.current({ step, area, title, oneThing, notificationTime: notify });
+  }, [restored, starting, step, area, title, oneThing, notify]);
 
   // 단계가 바뀌는 순간에는 미루지 않고 바로 저장한다. 위의 저장 effect 가 먼저 돌아
   // 새 단계가 포함된 최신 초안을 예약해 두므로, 여기서 그것을 즉시 반영하게 된다.
   useEffect(() => {
-    saveDraft.flush();
-  }, [saveDraft, step]);
+    saveDraftRef.current.flush();
+  }, [step]);
 
-  // 화면을 떠날 때 대기 중인 마지막 입력을 유실하지 않는다
+  // 화면 unmount 또는 앱이 포그라운드를 떠날 때 대기 중인 마지막 입력을 유실하지 않는다
   // (마지막 키 입력 후 300ms 안에 나가는 경우).
-  useEffect(() => () => saveDraft.flush(), [saveDraft]);
+  useEffect(() => () => saveDraftRef.current.flush(), []);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') saveDraftRef.current.flush();
+    });
+    return () => subscription.remove();
+  }, []);
 
   const go = (delta: number) => {
     const next = ORDER[ORDER.indexOf(step) + delta];
@@ -117,7 +122,7 @@ export default function Onboarding() {
   const start = async () => {
     setStarting(true);
     // 지우기 직전에 대기 중인 저장을 버린다. flush 하면 지운 초안이 되살아난다.
-    saveDraft.cancel();
+    saveDraftRef.current.cancel();
     await onboardingDraftStore.remove();
     await startGoal({ title, oneThing, area, notificationTime: notify ?? null }, today);
     router.replace('/');
