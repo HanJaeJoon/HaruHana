@@ -7,3 +7,15 @@ nodeLinker: hoisted
 # unrs-resolver 는 eslint-config-expo 가 끌어오며 플랫폼 바인딩을 검증한다.
 allowBuilds:
   unrs-resolver: true
+
+# 보안 픽스 강제 (전부 expo CLI / metro / config-plugins 경유 빌드 타임 전이 의존).
+# image-size 는 권고가 지목한 패치 버전 2.0.3 이 아직 npm 에 없어 오버라이드를 넣지 못한다.
+# pnpm 11 은 package.json 의 pnpm 필드(pnpm.overrides)를 읽지 않으므로 반드시 여기 둔다.
+# xcode 의 uuid 만 중첩 오버라이드 문법(부모>자식)을 쓴다.
+overrides:
+  xcode>uuid: ^11.1.1
+  decode-uri-component: '>=0.4.3'
+  # xmldom 은 0.8 계열(plist)과 0.9 계열이 함께 쓰여 API 가 달라 한 메이저로 통일할 수 없다.
+  # 메이저별 선택자로 각각 패치 버전만 올린다.
+  '@xmldom/xmldom@0.8': '>=0.8.15 <0.9'
+  '@xmldom/xmldom@0.9': '>=0.9.12 <1'
