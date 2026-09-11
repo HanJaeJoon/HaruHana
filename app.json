@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.hanjaejoon.haruhana",
-      "versionCode": 3,
+      "versionCode": 4,
       "adaptiveIcon": {
         "backgroundColor": "#f5f5f5",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
