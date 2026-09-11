@@ -1,4 +1,4 @@
-import { archiveGoal, newGoal } from '../habit';
+import { archiveGoal, editGoal, newGoal } from '../habit';
 import type { DailyRecord, Goal } from '../model';
 
 const goal: Goal = {
@@ -44,5 +44,31 @@ describe('archiveGoal', () => {
     const second = archiveGoal({ ...goal, id: 'g2' }, [], '2026-08-20', 'achieved');
     const archive = [second, first];
     expect(archive.map((e) => e.closedAt)).toEqual(['2026-08-20', '2026-07-01']);
+  });
+});
+
+describe('editGoal', () => {
+  const tagged: Goal = { ...goal, area: 'job' };
+
+  it('제목의 앞뒤 공백을 정리해 담는다', () => {
+    expect(editGoal(goal, { title: '  토익 950점 ' }).title).toBe('토익 950점');
+  });
+
+  it('id, createdAt, oneThing 은 그대로 둔다 (같은 목표를 이어 간다)', () => {
+    const next = editGoal(tagged, { title: '새 제목', area: 'body' });
+    expect(next.id).toBe(goal.id);
+    expect(next.createdAt).toBe(goal.createdAt);
+    expect(next.oneThing).toBe(goal.oneThing);
+  });
+
+  it('영역을 바꾸거나 떼어 낼 수 있다', () => {
+    expect(editGoal(tagged, { title: 'a', area: 'finance' }).area).toBe('finance');
+    expect(editGoal(tagged, { title: 'a' }).area).toBeUndefined();
+    expect('area' in editGoal(tagged, { title: 'a' })).toBe(false);
+  });
+
+  it('원본을 바꾸지 않는다', () => {
+    editGoal(tagged, { title: '새 제목', area: 'body' });
+    expect(tagged).toEqual({ ...goal, area: 'job' });
   });
 });

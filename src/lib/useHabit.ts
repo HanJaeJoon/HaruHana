@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { archiveGoal, newGoal } from './habit';
+import { archiveGoal, editGoal, newGoal } from './habit';
 import type { Area, ArchivedGoal, DailyRecord, Goal, Outcome, Settings } from './model';
 import { syncDailyReminder } from './notifications';
 import { clearRecord, setRecord } from './records';
@@ -80,6 +80,22 @@ export function useHabitState() {
     [goal, settings.notificationTime]
   );
 
+  /**
+   * 목표의 제목/영역을 고친다. 같은 목표를 이어 가는 것이므로 66일 카운트(records)와
+   * createdAt/id 는 그대로 둔다. 알림 문구는 오늘의 하나만 쓰므로 재예약할 것이 없다.
+   */
+  const updateGoal = useCallback(
+    (input: { title: string; area?: Area }) => {
+      if (!goal) return;
+      // 제목이 비면 저장하지 않는다 (온보딩에서도 빈 제목으로는 넘어가지 못한다).
+      if (input.title.trim().length === 0) return;
+      const next = editGoal(goal, input);
+      setGoal(next);
+      void goalStore.save(next);
+    },
+    [goal]
+  );
+
   const startGoal = useCallback(
     async (input: NewGoalInput, createdAt: string) => {
       const next = newGoal({ title: input.title, oneThing: input.oneThing, area: input.area, createdAt });
@@ -136,6 +152,7 @@ export function useHabitState() {
     mark,
     unmark,
     updateOneThing,
+    updateGoal,
     startGoal,
     finishGoal,
     markCelebrated,

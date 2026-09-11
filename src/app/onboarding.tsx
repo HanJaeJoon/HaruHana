@@ -8,7 +8,6 @@ import { THEME_OVERRIDES, useAccent } from '@/lib/branding';
 import { debounce } from '@/lib/debounce';
 import { t } from '@/lib/i18n';
 import {
-  AREAS,
   ONBOARDING_STEPS,
   isTimeString,
   type Area,
@@ -19,6 +18,8 @@ import { useHabit } from '@/lib/habitContext';
 import { onboardingDraftStore } from '@/lib/store';
 import { useToday } from '@/lib/useToday';
 
+import { AreaPicker } from '@/components/AreaPicker';
+import { GoalTitleInput } from '@/components/GoalTitleInput';
 import { PressButton } from '@/components/PressButton';
 
 const PRESET_TIMES = ['07:00', '08:00', '09:00'] as const;
@@ -142,31 +143,18 @@ export default function Onboarding() {
       {step === 'area' && (
         <>
           <Block title={t('obAreaTitle')} body={t('obAreaBody')} colors={colors} />
-          <View style={styles.list}>
-            {AREAS.map((candidate) => (
-              <PressButton
-                key={candidate}
-                label={t(`area_${candidate}`)}
-                onPress={() => setArea(area === candidate ? undefined : candidate)}
-                colors={colors}
-                accent={accent}
-                variant={area === candidate ? 'filled' : 'outline'}
-              />
-            ))}
-          </View>
+          <AreaPicker value={area} onChange={setArea} colors={colors} accent={accent} />
         </>
       )}
 
       {step === 'goal' && (
         <>
           <Block title={t('obGoalTitle')} body={t('obGoalBody')} colors={colors} />
-          <TextInput
+          <GoalTitleInput
             value={title}
             onChangeText={setTitle}
             placeholder={t('obGoalPlaceholder')}
-            placeholderTextColor={colors.faint}
-            multiline
-            style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.card }]}
+            colors={colors}
           />
         </>
       )}
