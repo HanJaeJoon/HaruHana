@@ -92,6 +92,8 @@ type Strings = {
   settingsGoalSave: string;
   settingsNotificationBlocked: string;
   settingsNotificationOpenSettings: string;
+  settingsAdsSection: string;
+  settingsAdsPrivacy: string;
 };
 
 export const translations: Record<AppLocale, Strings> = {
@@ -180,6 +182,8 @@ export const translations: Record<AppLocale, Strings> = {
     settingsGoalSave: '목표 저장',
     settingsNotificationBlocked: '기기에서 알림이 차단돼 있어 예약되지 않았습니다. 기기 설정에서 알림을 켜 주세요.',
     settingsNotificationOpenSettings: '기기 설정 열기',
+    settingsAdsSection: '광고',
+    settingsAdsPrivacy: '광고 개인 설정',
   },
   en: {
     tagline: 'One goal this year. One thing today.',
@@ -266,5 +270,7 @@ export const translations: Record<AppLocale, Strings> = {
     settingsGoalSave: 'Save goal',
     settingsNotificationBlocked: 'Notifications are blocked on this device, so nothing is scheduled. Turn them on in device settings.',
     settingsNotificationOpenSettings: 'Open device settings',
+    settingsAdsSection: 'Ads',
+    settingsAdsPrivacy: 'Ad privacy settings',
   },
 };

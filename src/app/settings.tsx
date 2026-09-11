@@ -2,6 +2,7 @@ import { Redirect, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Linking, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
+import { showPrivacyOptions, usePrivacyOptionsRequired } from '@/kit/ads/consent';
 import { useThemeColors } from '@/kit/theme';
 
 import { THEME_OVERRIDES, useAccent } from '@/lib/branding';
@@ -25,6 +26,8 @@ export default function Settings() {
   const accent = useAccent();
   const today = useToday();
   const router = useRouter();
+  // 규제 지역(EEA/UK)에서만 UMP 가 REQUIRED 를 준다. 그 밖에서는 항상 false 라 버튼이 없다.
+  const privacyOptionsRequired = usePrivacyOptionsRequired();
   const { status, goal, settings, reminderStatus, updateOneThing, updateGoal, setNotificationTime, finishGoal } =
     useHabit();
 
@@ -198,6 +201,19 @@ export default function Settings() {
           </View>
         )}
       </View>
+
+      {privacyOptionsRequired ? (
+        <View style={styles.section}>
+          <Text style={[styles.label, { color: colors.faint }]}>{t('settingsAdsSection')}</Text>
+          <PressButton
+            label={t('settingsAdsPrivacy')}
+            onPress={() => void showPrivacyOptions()}
+            colors={colors}
+            accent={accent}
+            variant="outline"
+          />
+        </View>
+      ) : null}
     </ScrollView>
   );
 }

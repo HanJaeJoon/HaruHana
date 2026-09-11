@@ -1,8 +1,10 @@
 import { Stack, useRouter, usePathname } from 'expo-router';
+import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AdBanner from '@/kit/ads/AdBanner';
+import { ensureAdsConsent, shouldRequestAds, useAdsConsentResult } from '@/kit/ads/consent';
 import { useThemeColors, type ThemeColors } from '@/kit/theme';
 
 import { BRANDING, THEME_OVERRIDES, useAccent } from '@/lib/branding';
@@ -45,6 +47,13 @@ function Shell() {
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
   const showNav = shouldShowTabs(pathname);
+  const consent = useAdsConsentResult();
+
+  // UMP 동의는 앱 시작 시 1회만 확인한다. kit 이 중복 호출을 합쳐 주지만
+  // 마운트 이펙트 한 곳에서만 부르는 것을 규칙으로 둔다.
+  useEffect(() => {
+    void ensureAdsConsent();
+  }, []);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background, paddingTop: insets.top }]}>
@@ -61,7 +70,11 @@ function Shell() {
           { backgroundColor: colors.bannerBg, borderTopColor: colors.border, paddingBottom: 4 + insets.bottom },
         ]}
       >
-        <AdBanner productionUnitId={BRANDING.adBannerUnitId ?? undefined} />
+        {/* 판정 전에는 배너를 요청하지 않는다. 판단 불가(Expo Go/웹/UMP 실패)면 기존대로 띄운다. */}
+        <AdBanner
+          productionUnitId={BRANDING.adBannerUnitId ?? undefined}
+          enabled={shouldRequestAds(consent)}
+        />
       </View>
     </View>
   );
