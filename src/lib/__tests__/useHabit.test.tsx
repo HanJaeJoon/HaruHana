@@ -54,6 +54,18 @@ beforeEach(async () => {
   await recordsStore.save(records);
 });
 
+describe('useHabitState() 자동 동기화', () => {
+  it('앱을 켜면 저장된 설정대로 다시 예약한다 (다이얼로그는 띄우지 않는다)', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { syncDailyReminder } = require('../notifications') as { syncDailyReminder: jest.Mock };
+    const habit = await mountHabit();
+
+    // 절전/강제 중지로 예약이 날아가거나 나중에 권한을 켠 경우를 여기서 되살린다.
+    expect(syncDailyReminder).toHaveBeenCalledWith(null, goal.oneThing, { canPrompt: false });
+    await act(async () => habit.renderer.unmount());
+  });
+});
+
 describe('useHabitState().updateGoal', () => {
   it('제목과 영역을 바꿔 저장한다', async () => {
     const habit = await mountHabit();
