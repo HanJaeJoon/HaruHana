@@ -1,5 +1,5 @@
-import { Link, Stack, usePathname } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Stack, useRouter, usePathname } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import AdBanner from '@/kit/ads/AdBanner';
@@ -8,13 +8,16 @@ import { useThemeColors, type ThemeColors } from '@/kit/theme';
 import { BRANDING, THEME_OVERRIDES, useAccent } from '@/lib/branding';
 import { HabitProvider } from '@/lib/habitContext';
 import { t } from '@/lib/i18n';
+import { isTabActive, shouldShowTabs } from '@/lib/nav';
 
-const TABS = [
-  { href: '/', labelKey: 'navToday' },
-  { href: '/calendar', labelKey: 'navCalendar' },
-  { href: '/archive', labelKey: 'navArchive' },
-  { href: '/settings', labelKey: 'navSettings' },
-] as const;
+import { TabIcon, type TabIconName } from '@/components/TabIcon';
+
+const TABS: readonly { href: '/' | '/calendar' | '/archive' | '/settings'; labelKey: 'navToday' | 'navCalendar' | 'navArchive' | 'navSettings'; icon: TabIconName }[] = [
+  { href: '/', labelKey: 'navToday', icon: 'today' },
+  { href: '/calendar', labelKey: 'navCalendar', icon: 'calendar' },
+  { href: '/archive', labelKey: 'navArchive', icon: 'archive' },
+  { href: '/settings', labelKey: 'navSettings', icon: 'settings' },
+];
 
 export default function RootLayout() {
   return (
@@ -32,49 +35,63 @@ export default function RootLayout() {
  * 앱은 edge-to-edge 로 그려지므로 상태바 높이를 고정값으로 두면 기기마다 어긋난다.
  * 탭이 없는 화면(목표 설정 흐름)에서는 제목이 상태바와 겹쳤다 - 그래서 탭이 아니라
  * 루트에 인셋을 주고 모든 화면이 같은 여백을 받게 한다.
+ *
+ * 하단 인셋은 화면 맨 아래 요소인 광고 배너가 받는다 (탭 바가 아니다).
+ * 탭 바 위가 아니라 아래에 배너가 있으므로, 인셋을 탭 바에 주면 배너가
+ * 제스처 바에 깔린다.
  */
 function Shell() {
   const colors = useThemeColors(THEME_OVERRIDES);
   const pathname = usePathname();
   const insets = useSafeAreaInsets();
-  // 목표 설정 흐름 중에는 다른 화면으로 새지 않게 한다.
-  const showNav = pathname !== '/onboarding';
+  const showNav = shouldShowTabs(pathname);
 
   return (
     <View style={[styles.root, { backgroundColor: colors.background, paddingTop: insets.top }]}>
-      {showNav && <TopNav pathname={pathname} colors={colors} />}
       <Stack screenOptions={{ headerShown: false }} />
+      {showNav && <BottomNav pathname={pathname} colors={colors} />}
       {/*
         광고 크리에이티브의 색은 통제할 수 없다. 경계선과 배경으로 무채색 본문과
         격리하고, 체크 버튼과는 거리를 둔다 (오클릭 유도 금지).
+        탭 바와도 간격을 둬서 탭을 누르려다 배너를 누르는 일이 없게 한다.
       */}
-      <View style={[styles.banner, { backgroundColor: colors.bannerBg, borderTopColor: colors.border }]}>
+      <View
+        style={[
+          styles.banner,
+          { backgroundColor: colors.bannerBg, borderTopColor: colors.border, paddingBottom: 4 + insets.bottom },
+        ]}
+      >
         <AdBanner productionUnitId={BRANDING.adBannerUnitId ?? undefined} />
       </View>
     </View>
   );
 }
 
-function TopNav({ pathname, colors }: { pathname: string; colors: ThemeColors }) {
+/** 하단 탭 바. 아이콘 + 짧은 라벨, 활성은 accent 색으로만 구분한다. */
+function BottomNav({ pathname, colors }: { pathname: string; colors: ThemeColors }) {
   const accent = useAccent();
+  const router = useRouter();
 
   return (
-    <View style={[styles.nav, { borderBottomColor: colors.border }]}>
+    <View style={[styles.nav, { backgroundColor: colors.background, borderTopColor: colors.border }]}>
       {TABS.map((tab) => {
-        const active = pathname === tab.href;
+        const active = isTabActive(pathname, tab.href);
+        const label = t(tab.labelKey);
+        const tint = active ? accent.bg : colors.faint;
         return (
-          <Link key={tab.href} href={tab.href} style={styles.navItem}>
-            <Text
-              style={[
-                styles.navLabel,
-                { color: active ? colors.text : colors.faint },
-                active ? { borderBottomColor: accent.bg } : null,
-                active ? styles.navLabelActive : null,
-              ]}
-            >
-              {t(tab.labelKey)}
+          <Pressable
+            key={tab.href}
+            onPress={() => router.navigate(tab.href)}
+            style={styles.navItem}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: active }}
+            accessibilityLabel={label}
+          >
+            <TabIcon name={tab.icon} color={tint} />
+            <Text style={[styles.navLabel, { color: tint }, active ? styles.navLabelActive : null]} numberOfLines={1}>
+              {label}
             </Text>
-          </Link>
+          </Pressable>
         );
       })}
     </View>
@@ -87,24 +104,28 @@ const styles = StyleSheet.create({
   },
   nav: {
     flexDirection: 'row',
-    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    // 배너와의 최소 간격. 오클릭 유도로 읽히지 않게 띄운다.
+    marginBottom: 8,
   },
   navItem: {
     flex: 1,
-    textAlign: 'center',
-    paddingVertical: 12,
+    // 터치 영역 48dp 이상.
+    minHeight: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+    gap: 4,
   },
   navLabel: {
-    fontSize: 13,
+    fontSize: 11,
     textAlign: 'center',
-    paddingBottom: 4,
   },
   navLabelActive: {
     fontWeight: '700',
-    borderBottomWidth: 2,
   },
   banner: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    paddingVertical: 4,
+    paddingTop: 4,
   },
 });
