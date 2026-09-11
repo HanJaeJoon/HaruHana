@@ -7,9 +7,11 @@ import { useThemeColors } from '@/kit/theme';
 import { THEME_OVERRIDES, useAccent } from '@/lib/branding';
 import { useHabit } from '@/lib/habitContext';
 import { t } from '@/lib/i18n';
-import { isTimeString, type Outcome } from '@/lib/model';
+import { isTimeString, type Area, type Outcome } from '@/lib/model';
 import { useToday } from '@/lib/useToday';
 
+import { AreaPicker } from '@/components/AreaPicker';
+import { GoalTitleInput } from '@/components/GoalTitleInput';
 import { PressButton } from '@/components/PressButton';
 
 const PRESET_TIMES = ['07:00', '08:00', '09:00'] as const;
@@ -23,9 +25,11 @@ export default function Settings() {
   const accent = useAccent();
   const today = useToday();
   const router = useRouter();
-  const { status, goal, settings, updateOneThing, setNotificationTime, finishGoal } = useHabit();
+  const { status, goal, settings, updateOneThing, updateGoal, setNotificationTime, finishGoal } = useHabit();
 
   const [draft, setDraft] = useState(goal?.oneThing ?? '');
+  const [titleDraft, setTitleDraft] = useState(goal?.title ?? '');
+  const [areaDraft, setAreaDraft] = useState<Area | undefined>(goal?.area);
   // null 이면 아직 입력 칸을 건드리지 않은 것이다 - 그동안은 저장된 값을 그대로 비춘다.
   const [customTime, setCustomTime] = useState<string | null>(null);
   const [confirming, setConfirming] = useState<Outcome | null>(null);
@@ -49,6 +53,26 @@ export default function Settings() {
   return (
     <ScrollView style={{ backgroundColor: colors.background }} contentContainerStyle={styles.content}>
       <Text style={[styles.title, { color: colors.text }]}>{t('settingsTitle')}</Text>
+
+      <View style={styles.section}>
+        <Text style={[styles.label, { color: colors.faint }]}>{t('settingsGoalEdit')}</Text>
+        <Text style={[styles.body, { color: colors.subtext }]}>{t('settingsGoalTitle')}</Text>
+        <GoalTitleInput value={titleDraft} onChangeText={setTitleDraft} colors={colors} compact />
+        <Text style={[styles.body, { color: colors.subtext }]}>{t('settingsGoalArea')}</Text>
+        <Text style={[styles.hint, { color: colors.faint }]}>{t('settingsGoalAreaHint')}</Text>
+        <AreaPicker value={areaDraft} onChange={setAreaDraft} colors={colors} accent={accent} />
+        {/* 제목/영역만 고치는 것이므로 66일 카운트는 유지된다. */}
+        <PressButton
+          label={t('settingsGoalSave')}
+          onPress={() => updateGoal({ title: titleDraft, area: areaDraft })}
+          colors={colors}
+          accent={accent}
+          disabled={
+            titleDraft.trim().length === 0 ||
+            (titleDraft.trim() === goal.title && areaDraft === goal.area)
+          }
+        />
+      </View>
 
       <View style={styles.section}>
         <Text style={[styles.label, { color: colors.faint }]}>{t('settingsOneThing')}</Text>
@@ -193,6 +217,10 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  hint: {
+    fontSize: 13,
+    lineHeight: 19,
   },
   input: {
     borderRadius: 10,

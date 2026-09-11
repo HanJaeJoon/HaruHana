@@ -85,6 +85,11 @@ type Strings = {
   navSettings: string;
   notificationBody: string;
   notificationChannel: string;
+  settingsGoalEdit: string;
+  settingsGoalTitle: string;
+  settingsGoalArea: string;
+  settingsGoalAreaHint: string;
+  settingsGoalSave: string;
 };
 
 export const translations: Record<AppLocale, Strings> = {
@@ -166,6 +171,11 @@ export const translations: Record<AppLocale, Strings> = {
     navSettings: '설정',
     notificationBody: '오늘의 하나: %{oneThing}',
     notificationChannel: '오늘의 하나 알림',
+    settingsGoalEdit: '올해의 목표',
+    settingsGoalTitle: '목표 제목',
+    settingsGoalArea: '영역',
+    settingsGoalAreaHint: '고른 것을 다시 누르면 영역을 뗍니다.',
+    settingsGoalSave: '목표 저장',
   },
   en: {
     tagline: 'One goal this year. One thing today.',
@@ -245,5 +255,10 @@ export const translations: Record<AppLocale, Strings> = {
     navSettings: 'Settings',
     notificationBody: 'Today, one thing: %{oneThing}',
     notificationChannel: 'Daily one thing',
+    settingsGoalEdit: 'Your goal this year',
+    settingsGoalTitle: 'Goal',
+    settingsGoalArea: 'Area',
+    settingsGoalAreaHint: 'Tap the selected one again to remove the area.',
+    settingsGoalSave: 'Save goal',
   },
 };
