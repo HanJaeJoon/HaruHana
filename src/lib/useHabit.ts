@@ -3,11 +3,12 @@
 // 파생값은 여기서 계산하지 않는다 - records 를 그대로 넘겨 화면이 records.ts 의
 // 순수 함수로 계산하게 둔다 (달력도 records 를 prop 으로 받는 순수 컴포넌트다).
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 
 import { archiveGoal, editGoal, newGoal } from './habit';
 import type { Area, ArchivedGoal, DailyRecord, Goal, Outcome, Settings } from './model';
-import { syncDailyReminder } from './notifications';
+import { syncDailyReminder, type ReminderSyncResult } from './notifications';
 import { clearRecord, setRecord } from './records';
 import { INITIAL_SETTINGS, archiveStore, goalStore, recordsStore, settingsStore } from './store';
 
@@ -26,9 +27,27 @@ export function useHabitState() {
   const [records, setRecords] = useState<DailyRecord[]>([]);
   const [settings, setSettings] = useState<Settings>(INITIAL_SETTINGS);
   const [archive, setArchive] = useState<ArchivedGoal[]>([]);
+  // 파생/일시 상태라 저장하지 않는다. 켤 때마다 실제 예약 상태를 다시 본다.
+  const [reminderStatus, setReminderStatus] = useState<ReminderSyncResult | null>(null);
+
+  // 포그라운드 복귀 리스너가 최신 값을 읽되 리스너를 다시 달지는 않으려고 ref 로 들고 있는다.
+  const latest = useRef({ notificationTime: INITIAL_SETTINGS.notificationTime, oneThing: '' });
+  useEffect(() => {
+    latest.current = { notificationTime: settings.notificationTime, oneThing: goal?.oneThing ?? '' };
+  }, [settings.notificationTime, goal?.oneThing]);
 
   useEffect(() => {
     let cancelled = false;
+
+    /**
+     * 저장된 설정대로 다시 예약한다. 여러 번 불러도 결과가 같다.
+     * 사용자가 부른 것이 아니므로 권한 다이얼로그는 띄우지 않는다(canPrompt: false).
+     */
+    async function resync(time: string | null, oneThing: string) {
+      const result = await syncDailyReminder(time, oneThing, { canPrompt: false });
+      if (!cancelled) setReminderStatus(result);
+    }
+
     (async () => {
       const [savedGoal, savedRecords, savedSettings, savedArchive] = await Promise.all([
         goalStore.load(),
@@ -42,9 +61,20 @@ export function useHabitState() {
       setSettings(savedSettings ?? INITIAL_SETTINGS);
       setArchive(savedArchive ?? []);
       setLoaded(true);
+      // 사용자가 아무것도 하지 않아도 예약을 되살린다. 시스템 설정에서 나중에 알림을
+      // 켰거나 절전/강제 중지로 예약이 날아간 경우, 여기 말고는 복구할 경로가 없다.
+      void resync((savedSettings ?? INITIAL_SETTINGS).notificationTime, savedGoal?.oneThing ?? '');
     })();
+
+    // 포그라운드로 돌아올 때도 같은 확인을 한다 (기기 설정에서 알림을 켜고 돌아온 경우).
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state !== 'active') return;
+      void resync(latest.current.notificationTime, latest.current.oneThing);
+    });
+
     return () => {
       cancelled = true;
+      subscription.remove();
     };
   }, []);
 
@@ -75,7 +105,7 @@ export function useHabitState() {
       setGoal(next);
       void goalStore.save(next);
       // 알림 문구에 오늘의 하나가 들어가므로 문구가 바뀌면 다시 예약한다.
-      void syncDailyReminder(settings.notificationTime, next.oneThing);
+      void syncDailyReminder(settings.notificationTime, next.oneThing).then(setReminderStatus);
     },
     [goal, settings.notificationTime]
   );
@@ -104,7 +134,7 @@ export function useHabitState() {
       setRecords([]);
       setSettings(nextSettings);
       await Promise.all([goalStore.save(next), recordsStore.save([]), settingsStore.save(nextSettings)]);
-      await syncDailyReminder(nextSettings.notificationTime, next.oneThing);
+      setReminderStatus(await syncDailyReminder(nextSettings.notificationTime, next.oneThing));
     },
     []
   );
@@ -123,7 +153,7 @@ export function useHabitState() {
       setSettings(nextSettings);
       await Promise.all([goalStore.remove(), recordsStore.save([]), settingsStore.save(nextSettings)]);
       // 다음 목표를 정하기 전까지는 알릴 것이 없다.
-      await syncDailyReminder(null, '');
+      setReminderStatus(await syncDailyReminder(null, ''));
     },
     [goal, records, settings, archive]
   );
@@ -136,7 +166,7 @@ export function useHabitState() {
   const setNotificationTime = useCallback(
     (notificationTime: string | null) => {
       putSettings({ ...settings, notificationTime });
-      void syncDailyReminder(notificationTime, goal?.oneThing ?? '');
+      void syncDailyReminder(notificationTime, goal?.oneThing ?? '').then(setReminderStatus);
     },
     [settings, putSettings, goal]
   );
@@ -149,6 +179,7 @@ export function useHabitState() {
     records,
     settings,
     archive,
+    reminderStatus,
     mark,
     unmark,
     updateOneThing,

@@ -1,6 +1,6 @@
 import { Redirect, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { useThemeColors } from '@/kit/theme';
 
@@ -25,7 +25,8 @@ export default function Settings() {
   const accent = useAccent();
   const today = useToday();
   const router = useRouter();
-  const { status, goal, settings, updateOneThing, updateGoal, setNotificationTime, finishGoal } = useHabit();
+  const { status, goal, settings, reminderStatus, updateOneThing, updateGoal, setNotificationTime, finishGoal } =
+    useHabit();
 
   const [draft, setDraft] = useState(goal?.oneThing ?? '');
   const [titleDraft, setTitleDraft] = useState(goal?.title ?? '');
@@ -44,6 +45,13 @@ export default function Settings() {
   // 프리셋에 없는 시각으로 설정돼 있으면 입력 칸이 그 값을 보여준다.
   const savedCustom =
     settings.notificationTime !== null && !isPreset(settings.notificationTime) ? settings.notificationTime : '';
+
+  // 저장된 시각이 있어도 OS 가 막고 있으면 알림은 오지 않는다. 그 차이를 화면에 보인다.
+  const reminderFailed =
+    settings.notificationTime !== null &&
+    (reminderStatus === 'permission-denied' ||
+      reminderStatus === 'permission-blocked' ||
+      reminderStatus === 'unavailable');
 
   const finish = async (outcome: Outcome) => {
     await finishGoal(outcome, today);
@@ -100,6 +108,18 @@ export default function Settings() {
             ? t('settingsNotificationCurrentOff')
             : t('settingsNotificationCurrent', { value: settings.notificationTime })}
         </Text>
+        {reminderFailed ? (
+          <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.text }]}>
+            <Text style={[styles.body, { color: colors.text }]}>{t('settingsNotificationBlocked')}</Text>
+            <PressButton
+              label={t('settingsNotificationOpenSettings')}
+              onPress={() => void Linking.openSettings()}
+              colors={colors}
+              accent={accent}
+              variant="outline"
+            />
+          </View>
+        ) : null}
         <View style={styles.list}>
           {PRESET_TIMES.map((time) => (
             <PressButton
@@ -115,7 +135,8 @@ export default function Settings() {
             value={customTime ?? savedCustom}
             onChangeText={(value) => {
               setCustomTime(value);
-              if (isTimeString(value)) setNotificationTime(value);
+              // 같은 값이면 다시 예약할 것이 없다 (한 글자 지웠다 같은 값을 넣은 경우 등).
+              if (isTimeString(value) && value !== settings.notificationTime) setNotificationTime(value);
             }}
             placeholder={t('obNotifyCustom')}
             placeholderTextColor={colors.faint}

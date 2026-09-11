@@ -90,6 +90,8 @@ type Strings = {
   settingsGoalArea: string;
   settingsGoalAreaHint: string;
   settingsGoalSave: string;
+  settingsNotificationBlocked: string;
+  settingsNotificationOpenSettings: string;
 };
 
 export const translations: Record<AppLocale, Strings> = {
@@ -176,6 +178,8 @@ export const translations: Record<AppLocale, Strings> = {
     settingsGoalArea: '영역',
     settingsGoalAreaHint: '고른 것을 다시 누르면 영역을 뗍니다.',
     settingsGoalSave: '목표 저장',
+    settingsNotificationBlocked: '기기에서 알림이 차단돼 있어 예약되지 않았습니다. 기기 설정에서 알림을 켜 주세요.',
+    settingsNotificationOpenSettings: '기기 설정 열기',
   },
   en: {
     tagline: 'One goal this year. One thing today.',
@@ -260,5 +264,7 @@ export const translations: Record<AppLocale, Strings> = {
     settingsGoalArea: 'Area',
     settingsGoalAreaHint: 'Tap the selected one again to remove the area.',
     settingsGoalSave: 'Save goal',
+    settingsNotificationBlocked: 'Notifications are blocked on this device, so nothing is scheduled. Turn them on in device settings.',
+    settingsNotificationOpenSettings: 'Open device settings',
   },
 };
