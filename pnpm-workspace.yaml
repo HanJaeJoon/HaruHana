@@ -9,7 +9,6 @@ allowBuilds:
   unrs-resolver: true
 
 # 보안 픽스 강제 (전부 expo CLI / metro / config-plugins 경유 빌드 타임 전이 의존).
-# image-size 는 권고가 지목한 패치 버전 2.0.3 이 아직 npm 에 없어 오버라이드를 넣지 못한다.
 # pnpm 11 은 package.json 의 pnpm 필드(pnpm.overrides)를 읽지 않으므로 반드시 여기 둔다.
 # xcode 의 uuid 만 중첩 오버라이드 문법(부모>자식)을 쓴다.
 overrides:
@@ -19,3 +18,15 @@ overrides:
   # 메이저별 선택자로 각각 패치 버전만 올린다.
   '@xmldom/xmldom@0.8': '>=0.8.15 <0.9'
   '@xmldom/xmldom@0.9': '>=0.9.12 <1'
+  # Dependabot 공개 알림 (2026-10, TSLA4Tesla canary 와 동일 패턴).
+  # braces@3.0.3, node-forge@1.4.0 은 이미 최신(패치)이라 override 불필요 (npm firstPatchedVersion 없음).
+  # image-size: 1.2.1(metro) 를 2.0.4 파서로. 2.x 는 경로 인자를 받지 않아 metro Assets.js 가 깨지므로
+  # vendor/image-size 래퍼(경로면 readFileSync)로 바꾼다. 실제 파서는 @image-size/core(=npm image-size@2.0.4).
+  # 패치(2.0.3+)는 2026-09-15(KST) npm 출시.
+  image-size: file:./vendor/image-size
+  # js-yaml: 3.x(jest istanbul)와 4.x가 공존 - 메이저별 패치만.
+  'js-yaml@3': 3.15.2
+  'js-yaml@4': 4.3.2
+  # brace-expansion: 1.x(minimatch@3)와 5.x가 공존 - 메이저별 패치만.
+  'brace-expansion@1': 1.1.21
+  'brace-expansion@5': 5.0.12
