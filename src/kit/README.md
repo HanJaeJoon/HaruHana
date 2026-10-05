@@ -23,7 +23,7 @@ microapp-starter 에는 `currency.ts`, `chart/`, `share/` 도 있다. HaruHana �
 EEA/UK 등 규제 지역에 배포하려면 광고를 요청하기 전에 UMP(Google User Messaging
 Platform) 동의를 받아야 한다. 동의 흐름 없이 배포하면 정책 위반 소지가 있다.
 
-- `ads/consentLogic.ts` - 결과 해석/재시도/디버그 옵션 정리. 네이티브를 모르는 순수 함수
+- `ads/consentLogic.ts` - 결과 해석/재시도(`backoffMs`)/디버그 옵션 정리. 네이티브를 모르는 순수 함수
 - `ads/consent.ts` - `AdsConsent` 호출 어댑터와 결과 스토어 (`consent.web.ts` 는 웹 스텁)
 - `ads/AdBanner.tsx` - `enabled` 프롭으로 동의 판정 전 배너 요청을 막는다
 
@@ -34,6 +34,9 @@ Platform) 동의를 받아야 한다. 동의 흐름 없이 배포하면 정책 �
 | `showPrivacyOptions()` | 설정 화면의 "광고 개인 설정" 진입점 |
 | `usePrivacyOptionsRequired()` | 그 버튼을 노출해야 하는지 |
 | `useAdsConsentResult()` | 마지막 판정 구독 (판정 전 `null`) |
+
+`ensureAdsConsent` 는 `error` 로 실패하면 1초 뒤 한 번 더 시도한다 (총 2회, 지연은 `backoffMs` 지수 백오프).
+재시도 횟수 옵션(`maxRetries`)과 동기 조회 `getAdsConsentResult()` 는 없다. 판정은 `useAdsConsentResult()` 로 받는다.
 
 네이티브 모듈이 없는 환경(Expo Go/웹)과 UMP 호출 실패는 예외를 던지지 않고
 `unavailable` 로 돌아오며, `canRequestAds` 를 임의로 `true` 로 만들지 않는다.
