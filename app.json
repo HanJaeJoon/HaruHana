@@ -2,7 +2,7 @@
   "expo": {
     "name": "HaruHana",
     "slug": "haruhana",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "haruhana",
@@ -12,7 +12,7 @@
     },
     "android": {
       "package": "com.hanjaejoon.haruhana",
-      "versionCode": 4,
+      "versionCode": 5,
       "adaptiveIcon": {
         "backgroundColor": "#f5f5f5",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
