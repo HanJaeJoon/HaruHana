@@ -52,5 +52,6 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
+    textAlign: 'center',
   },
 });

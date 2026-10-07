@@ -18,21 +18,22 @@ type Props = {
 };
 
 /**
- * 7개 영역 중 하나를 고르는 목록. 목표 설정과 설정 화면이 같은 것을 쓴다.
+ * 7개 영역 중 하나를 고르는 2열 그리드. 목표 설정과 설정 화면이 같은 것을 쓴다.
  * 상태 구분은 색이 아니라 채움/외곽선으로 한다.
  */
 export function AreaPicker({ value, onChange, colors, accent }: Props) {
   return (
     <View style={styles.list}>
       {AREAS.map((candidate) => (
-        <PressButton
-          key={candidate}
-          label={t(`area_${candidate}`)}
-          onPress={() => onChange(value === candidate ? undefined : candidate)}
-          colors={colors}
-          accent={accent}
-          variant={value === candidate ? 'filled' : 'outline'}
-        />
+        <View key={candidate} style={styles.cell}>
+          <PressButton
+            label={t(`area_${candidate}`)}
+            onPress={() => onChange(value === candidate ? undefined : candidate)}
+            colors={colors}
+            accent={accent}
+            variant={value === candidate ? 'filled' : 'outline'}
+          />
+        </View>
       ))}
     </View>
   );
@@ -40,6 +41,12 @@ export function AreaPicker({ value, onChange, colors, accent }: Props) {
 
 const styles = StyleSheet.create({
   list: {
-    gap: 10,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    rowGap: 10,
+  },
+  cell: {
+    width: '48.5%',
   },
 });
