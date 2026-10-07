@@ -94,6 +94,7 @@ type Strings = {
   settingsNotificationOpenSettings: string;
   settingsAdsSection: string;
   settingsAdsPrivacy: string;
+  settingsPrivacyPolicy: string;
 };
 
 export const translations: Record<AppLocale, Strings> = {
@@ -184,6 +185,7 @@ export const translations: Record<AppLocale, Strings> = {
     settingsNotificationOpenSettings: '기기 설정 열기',
     settingsAdsSection: '광고',
     settingsAdsPrivacy: '광고 개인 설정',
+    settingsPrivacyPolicy: '개인정보처리방침',
   },
   en: {
     tagline: 'One goal this year. One thing today.',
@@ -272,5 +274,6 @@ export const translations: Record<AppLocale, Strings> = {
     settingsNotificationOpenSettings: 'Open device settings',
     settingsAdsSection: 'Ads',
     settingsAdsPrivacy: 'Ad privacy settings',
+    settingsPrivacyPolicy: 'Privacy policy',
   },
 };

@@ -15,6 +15,8 @@ import { AreaPicker } from '@/components/AreaPicker';
 import { GoalTitleInput } from '@/components/GoalTitleInput';
 import { PressButton } from '@/components/PressButton';
 
+const PRIVACY_POLICY_URL = 'https://whochoolab.github.io/haruhana-privacy/';
+
 const PRESET_TIMES = ['07:00', '08:00', '09:00'] as const;
 
 function isPreset(time: string): boolean {
@@ -202,9 +204,9 @@ export default function Settings() {
         )}
       </View>
 
-      {privacyOptionsRequired ? (
-        <View style={styles.section}>
-          <Text style={[styles.label, { color: colors.faint }]}>{t('settingsAdsSection')}</Text>
+      <View style={styles.section}>
+        <Text style={[styles.label, { color: colors.faint }]}>{t('settingsAdsSection')}</Text>
+        {privacyOptionsRequired ? (
           <PressButton
             label={t('settingsAdsPrivacy')}
             onPress={() => void showPrivacyOptions()}
@@ -212,8 +214,15 @@ export default function Settings() {
             accent={accent}
             variant="outline"
           />
-        </View>
-      ) : null}
+        ) : null}
+        <PressButton
+          label={t('settingsPrivacyPolicy')}
+          onPress={() => void Linking.openURL(PRIVACY_POLICY_URL)}
+          colors={colors}
+          accent={accent}
+          variant="outline"
+        />
+      </View>
     </ScrollView>
   );
 }
