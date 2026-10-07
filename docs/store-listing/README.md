@@ -137,7 +137,7 @@ powershell.exe -sta -NoProfile -Command \
 
 개인정보처리방침은 `HanJaeJoon/HanJaeJoon.github.io` 저장소에
 `haruhana-privacy/index.html` 로 올린다. URL 은
-**https://hanjaejoon.github.io/haruhana-privacy/** (끝 슬래시 필요).
+**https://whochoolab.github.io/haruhana-privacy/** (끝 슬래시 필요).
 
 **스토어 등록정보의 웹사이트 필드는 `https://hanjaejoon.github.io` 다.**
 AdMob 이 앱별 등록정보의 도메인을 크롤링해 앱을 인증하고, app-ads.txt 가 그 도메인

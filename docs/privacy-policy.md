@@ -1,6 +1,6 @@
 # HaruHana - Privacy Policy
 
-> **게시 위치: https://hanjaejoon.github.io/haruhana-privacy/**
+> **게시 위치: https://whochoolab.github.io/haruhana-privacy/**
 >
 > 이 파일이 원본이고, Play 에 제출하는 URL 은
 > `HanJaeJoon/HanJaeJoon.github.io` 저장소의 `haruhana-privacy/index.html`
