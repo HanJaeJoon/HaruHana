@@ -15,6 +15,7 @@ import {
   type OnboardingStep,
 } from '@/lib/model';
 import { useHabit } from '@/lib/habitContext';
+import { requestReminderPermission } from '@/lib/notifications';
 import { onboardingDraftStore } from '@/lib/store';
 import { useToday } from '@/lib/useToday';
 
@@ -63,6 +64,15 @@ export default function Onboarding() {
   const [restored, setRestored] = useState(false);
   // 시작 직후에는 다시 저장하지 않는다 (지운 것을 되살리지 않기 위해).
   const [starting, setStarting] = useState(false);
+  // 권한은 시각을 처음 고르는 순간 한 번만 묻는다. 시각을 바꿀 때마다 다이얼로그를 띄우지 않는다.
+  const permissionAsked = useRef(false);
+
+  const pickTime = (time: string | undefined) => {
+    setNotify(time);
+    if (time === undefined || permissionAsked.current) return;
+    permissionAsked.current = true;
+    void requestReminderPermission();
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -183,7 +193,7 @@ export default function Onboarding() {
                 key={time}
                 label={time}
                 onPress={() => {
-                  setNotify(time);
+                  pickTime(time);
                   setCustomOpen(false);
                 }}
                 colors={colors}
@@ -195,7 +205,7 @@ export default function Onboarding() {
               label={t('obNotifyCustom')}
               onPress={() => {
                 setCustomOpen(true);
-                setNotify(isTimeString(customTime) ? customTime : undefined);
+                pickTime(isTimeString(customTime) ? customTime : undefined);
               }}
               colors={colors}
               accent={accent}
@@ -207,7 +217,7 @@ export default function Onboarding() {
                 onChangeText={(value) => {
                   setCustomTime(value);
                   // 형식이 맞을 때만 선택으로 인정한다. 그 전에는 시작 버튼이 잠긴 채다.
-                  setNotify(isTimeString(value) ? value : undefined);
+                  pickTime(isTimeString(value) ? value : undefined);
                 }}
                 placeholder="07:30"
                 placeholderTextColor={colors.faint}

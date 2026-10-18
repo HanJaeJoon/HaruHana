@@ -54,9 +54,15 @@ export default function Settings() {
   // 저장된 시각이 있어도 OS 가 막고 있으면 알림은 오지 않는다. 그 차이를 화면에 보인다.
   const reminderFailed =
     settings.notificationTime !== null &&
-    (reminderStatus === 'permission-denied' ||
-      reminderStatus === 'permission-blocked' ||
-      reminderStatus === 'unavailable');
+    reminderStatus !== null &&
+    reminderStatus !== 'scheduled' &&
+    reminderStatus !== 'off';
+  const reminderFailureText =
+    reminderStatus === 'unsupported'
+      ? t('settingsNotificationUnsupported')
+      : reminderStatus === 'unavailable'
+        ? t('settingsNotificationUnavailable')
+        : t('settingsNotificationBlocked');
 
   const finish = async (outcome: Outcome) => {
     await finishGoal(outcome, today);
@@ -115,14 +121,16 @@ export default function Settings() {
         </Text>
         {reminderFailed ? (
           <View style={[styles.card, { backgroundColor: colors.card, borderColor: colors.text }]}>
-            <Text style={[styles.body, { color: colors.text }]}>{t('settingsNotificationBlocked')}</Text>
-            <PressButton
-              label={t('settingsNotificationOpenSettings')}
-              onPress={() => void Linking.openSettings()}
-              colors={colors}
-              accent={accent}
-              variant="outline"
-            />
+            <Text style={[styles.body, { color: colors.text }]}>{reminderFailureText}</Text>
+            {reminderStatus !== 'unsupported' ? (
+              <PressButton
+                label={t('settingsNotificationOpenSettings')}
+                onPress={() => void Linking.openSettings()}
+                colors={colors}
+                accent={accent}
+                variant="outline"
+              />
+            ) : null}
           </View>
         ) : null}
         <View style={styles.list}>

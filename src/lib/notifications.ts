@@ -4,6 +4,7 @@
 // 이미 오늘 기록이 있어도 알림은 항상 발송한다: 반복 트리거는 조건부 발송을 지원하지
 // 않고, "다음 1회만 재예약" 방식은 앱을 며칠 열지 않으면 알림이 끊긴다.
 
+import { isRunningInExpoGo } from 'expo';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
@@ -18,11 +19,20 @@ const CHANNEL_ID = 'daily-one-thing';
  *
  * - scheduled: 예약됐다
  * - off: 알림을 쓰지 않기로 한 상태 (time 이 null)
- * - permission-denied: 권한이 없다. 다시 물어볼 수는 있다
+ * - permission-undetermined: 아직 한 번도 묻지 않았다 (canPrompt: false 일 때만 나온다)
+ * - permission-denied: 사용자가 거부했다. 다시 물어볼 수는 있다
  * - permission-blocked: 기기 설정에서 막혀 있어 앱이 다시 물을 수 없다
- * - unavailable: 네이티브 모듈이 없거나(Expo Go / 웹) 예약이 등록되지 않았다
+ * - unsupported: Expo Go / 웹이라 알림 네이티브 기능을 쓸 수 없다
+ * - unavailable: 설치한 앱인데 예약 호출이 실패했거나 예약이 등록되지 않았다
  */
-export type ReminderSyncResult = 'scheduled' | 'off' | 'permission-denied' | 'permission-blocked' | 'unavailable';
+export type ReminderSyncResult =
+  | 'scheduled'
+  | 'off'
+  | 'permission-undetermined'
+  | 'permission-denied'
+  | 'permission-blocked'
+  | 'unsupported'
+  | 'unavailable';
 
 export type SyncDailyReminderOptions = {
   /**
@@ -94,17 +104,36 @@ export async function syncDailyReminder(
     return 'scheduled';
   } catch (error) {
     if (__DEV__) console.warn('[notifications] syncDailyReminder 실패', error);
-    return 'unavailable';
+    return failureResult();
   }
 }
 
-type PermissionResult = 'granted' | 'permission-denied' | 'permission-blocked';
+/**
+ * 예약 없이 권한만 묻는다. 온보딩의 알림 시각 선택 단계에서 시각을 고르는 순간 부른다.
+ * 이미 정해진 권한이면 다이얼로그 없이 현재 상태만 돌려준다.
+ */
+export async function requestReminderPermission(): Promise<PermissionResult | 'unsupported' | 'unavailable'> {
+  try {
+    // Android 13 이상은 채널이 하나도 없으면 권한 다이얼로그가 뜨지 않는다.
+    await ensureChannel();
+    return await checkPermission(true);
+  } catch (error) {
+    if (__DEV__) console.warn('[notifications] requestReminderPermission 실패', error);
+    return failureResult();
+  }
+}
+
+function failureResult(): 'unsupported' | 'unavailable' {
+  return Platform.OS === 'web' || isRunningInExpoGo() ? 'unsupported' : 'unavailable';
+}
+
+type PermissionResult = 'granted' | 'permission-undetermined' | 'permission-denied' | 'permission-blocked';
 
 async function checkPermission(canPrompt: boolean): Promise<PermissionResult> {
   const current = await Notifications.getPermissionsAsync();
   if (current.granted) return 'granted';
   if (!current.canAskAgain) return 'permission-blocked';
-  if (!canPrompt) return 'permission-denied';
+  if (!canPrompt) return current.status === 'undetermined' ? 'permission-undetermined' : 'permission-denied';
   const asked = await Notifications.requestPermissionsAsync();
   if (asked.granted) return 'granted';
   return asked.canAskAgain ? 'permission-denied' : 'permission-blocked';

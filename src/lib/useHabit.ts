@@ -134,7 +134,10 @@ export function useHabitState() {
       setRecords([]);
       setSettings(nextSettings);
       await Promise.all([goalStore.save(next), recordsStore.save([]), settingsStore.save(nextSettings)]);
-      setReminderStatus(await syncDailyReminder(nextSettings.notificationTime, next.oneThing));
+      // 권한은 온보딩의 알림 시각 단계에서 이미 물었다. 여기서 다시 띄우지 않는다.
+      setReminderStatus(
+        await syncDailyReminder(nextSettings.notificationTime, next.oneThing, { canPrompt: false })
+      );
     },
     []
   );

@@ -5,7 +5,10 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-import { syncDailyReminder } from '../notifications';
+import { requestReminderPermission, syncDailyReminder } from '../notifications';
+
+const mockIsRunningInExpoGo = jest.fn(() => false);
+jest.mock('expo', () => ({ isRunningInExpoGo: () => mockIsRunningInExpoGo() }));
 
 jest.mock('expo-notifications', () => ({
   setNotificationHandler: jest.fn(),
@@ -29,12 +32,13 @@ const mocked = Notifications as unknown as {
 };
 
 /** 권한 응답을 한 번만 바꾼다. */
-function givenPermission(current: { granted: boolean; canAskAgain: boolean }) {
+function givenPermission(current: { granted: boolean; canAskAgain: boolean; status?: string }) {
   mocked.getPermissionsAsync.mockResolvedValue(current);
 }
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockIsRunningInExpoGo.mockReturnValue(false);
   mocked.setNotificationChannelAsync.mockResolvedValue(undefined);
   mocked.getPermissionsAsync.mockResolvedValue({ granted: true, canAskAgain: true });
   mocked.requestPermissionsAsync.mockResolvedValue({ granted: true, canAskAgain: true });
@@ -87,11 +91,21 @@ describe('syncDailyReminder', () => {
   });
 
   it('canPrompt 가 false 면 시스템 다이얼로그를 띄우지 않는다', async () => {
-    givenPermission({ granted: false, canAskAgain: true });
+    givenPermission({ granted: false, canAskAgain: true, status: 'denied' });
 
     const result = await syncDailyReminder('07:00', '30분 걷기', { canPrompt: false });
 
     expect(result).toBe('permission-denied');
+    expect(mocked.requestPermissionsAsync).not.toHaveBeenCalled();
+  });
+
+  // 홈의 거부 안내는 거부했을 때만 나와야 한다. 아직 묻지 않은 상태와 구분한다.
+  it('canPrompt 가 false 이고 아직 묻지 않았으면 permission-undetermined 를 준다', async () => {
+    givenPermission({ granted: false, canAskAgain: true, status: 'undetermined' });
+
+    const result = await syncDailyReminder('07:00', '30분 걷기', { canPrompt: false });
+
+    expect(result).toBe('permission-undetermined');
     expect(mocked.requestPermissionsAsync).not.toHaveBeenCalled();
   });
 
@@ -120,6 +134,16 @@ describe('syncDailyReminder', () => {
     warn.mockRestore();
   });
 
+  it('Expo Go 에서 실패하면 기기 문제가 아니므로 unsupported 를 준다', async () => {
+    mockIsRunningInExpoGo.mockReturnValue(true);
+    mocked.scheduleNotificationAsync.mockRejectedValue(new Error('no native module'));
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+    expect(await syncDailyReminder('07:00', '30분 걷기')).toBe('unsupported');
+
+    warn.mockRestore();
+  });
+
   // 채널이 있어야 사용자가 기기 설정에서 이 앱의 알림 항목을 찾아 켤 수 있다.
   // 권한이 없을 때 채널 생성까지 건너뛰면 켤 방법 자체가 사라진다.
   it('채널을 권한 확인보다 먼저 만든다 (안드로이드)', async () => {
@@ -134,6 +158,37 @@ describe('syncDailyReminder', () => {
     expect(mocked.setNotificationChannelAsync).toHaveBeenCalledTimes(1);
     expect(mocked.setNotificationChannelAsync.mock.invocationCallOrder[0]).toBeLessThan(
       mocked.getPermissionsAsync.mock.invocationCallOrder[0]
+    );
+  });
+});
+
+describe('requestReminderPermission', () => {
+  it('아직 묻지 않았으면 다이얼로그를 띄우고 결과를 준다 (예약은 하지 않는다)', async () => {
+    givenPermission({ granted: false, canAskAgain: true, status: 'undetermined' });
+    mocked.requestPermissionsAsync.mockResolvedValue({ granted: false, canAskAgain: true });
+
+    expect(await requestReminderPermission()).toBe('permission-denied');
+    expect(mocked.requestPermissionsAsync).toHaveBeenCalledTimes(1);
+    expect(mocked.scheduleNotificationAsync).not.toHaveBeenCalled();
+  });
+
+  it('이미 허용돼 있으면 묻지 않는다', async () => {
+    expect(await requestReminderPermission()).toBe('granted');
+    expect(mocked.requestPermissionsAsync).not.toHaveBeenCalled();
+  });
+
+  // Android 13 이상은 채널이 없으면 권한 다이얼로그가 뜨지 않는다.
+  it('채널을 권한 요청보다 먼저 만든다 (안드로이드)', async () => {
+    const original = Platform.OS;
+    Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
+    givenPermission({ granted: false, canAskAgain: true, status: 'undetermined' });
+
+    await requestReminderPermission();
+
+    Object.defineProperty(Platform, 'OS', { value: original, configurable: true });
+
+    expect(mocked.setNotificationChannelAsync.mock.invocationCallOrder[0]).toBeLessThan(
+      mocked.requestPermissionsAsync.mock.invocationCallOrder[0]
     );
   });
 });

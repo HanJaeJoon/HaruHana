@@ -18,7 +18,7 @@ export default function Today() {
   const colors = useThemeColors(THEME_OVERRIDES);
   const accent = useAccent();
   const today = useToday();
-  const { status, goal, records, settings, mark, unmark, markCelebrated } = useHabit();
+  const { status, goal, records, settings, reminderStatus, mark, unmark, markCelebrated } = useHabit();
 
   if (status === 'loading') {
     return <View style={[styles.screen, { backgroundColor: colors.background }]} />;
@@ -34,6 +34,9 @@ export default function Today() {
   const progress = journeyProgress(records);
   const density = monthDensity(records, today);
   const celebrate = progress.reached && !settings.celebrated66;
+  const reminderDenied =
+    settings.notificationTime !== null &&
+    (reminderStatus === 'permission-denied' || reminderStatus === 'permission-blocked');
 
   return (
     <ScrollView
@@ -61,6 +64,10 @@ export default function Today() {
             notDoneText={t('markedNotDone')}
           />
         </View>
+      )}
+
+      {reminderDenied && (
+        <Text style={[styles.density, { color: colors.subtext }]}>{t('todayReminderDenied')}</Text>
       )}
 
       <View style={styles.goalBlock}>

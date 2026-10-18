@@ -64,6 +64,20 @@ describe('useHabitState() 자동 동기화', () => {
     expect(syncDailyReminder).toHaveBeenCalledWith(null, goal.oneThing, { canPrompt: false });
     await act(async () => habit.renderer.unmount());
   });
+
+  it('목표를 시작할 때는 권한을 다시 묻지 않는다 (온보딩 알림 단계에서 이미 물었다)', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { syncDailyReminder } = require('../notifications') as { syncDailyReminder: jest.Mock };
+    const habit = await mountHabit();
+    syncDailyReminder.mockClear();
+
+    await act(async () =>
+      habit.current().startGoal({ title: '새 목표', oneThing: '1시간', notificationTime: null }, '2026-08-20')
+    );
+
+    expect(syncDailyReminder).toHaveBeenCalledWith(null, '1시간', { canPrompt: false });
+    await act(async () => habit.renderer.unmount());
+  });
 });
 
 describe('useHabitState().updateGoal', () => {
