@@ -1,4 +1,4 @@
-import { archiveGoal, editGoal, newGoal } from '../habit';
+import { GOAL_TITLE_MAX_LENGTH, archiveGoal, editGoal, newGoal } from '../habit';
 import type { DailyRecord, Goal } from '../model';
 
 const goal: Goal = {
@@ -52,6 +52,14 @@ describe('editGoal', () => {
 
   it('제목의 앞뒤 공백을 정리해 담는다', () => {
     expect(editGoal(goal, { title: '  토익 950점 ' }).title).toBe('토익 950점');
+  });
+
+  it('제목은 최대 길이로 잘라 저장한다 (입력 칸 제한을 거치지 않은 값 방어)', () => {
+    const long = '가'.repeat(GOAL_TITLE_MAX_LENGTH + 10);
+    expect(editGoal(goal, { title: long }).title).toHaveLength(GOAL_TITLE_MAX_LENGTH);
+    expect(newGoal({ title: long, oneThing: 'b', createdAt: '2026-08-20' }).title).toHaveLength(GOAL_TITLE_MAX_LENGTH);
+    // 자른 끝에 공백이 남지 않는다
+    expect(editGoal(goal, { title: 'a'.repeat(GOAL_TITLE_MAX_LENGTH - 1) + ' b' }).title).toBe('a'.repeat(GOAL_TITLE_MAX_LENGTH - 1));
   });
 
   it('id, createdAt, oneThing 은 그대로 둔다 (같은 목표를 이어 간다)', () => {

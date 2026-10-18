@@ -2,6 +2,8 @@ import { StyleSheet, TextInput } from 'react-native';
 
 import type { ThemeColors } from '@/kit/theme';
 
+import { GOAL_TITLE_MAX_LENGTH } from '@/lib/habit';
+
 type Props = {
   value: string;
   onChangeText: (value: string) => void;
@@ -11,10 +13,7 @@ type Props = {
   compact?: boolean;
 };
 
-/**
- * 올해의 목표 제목 입력. 목표 설정과 설정 화면이 같은 것을 쓴다.
- * 길이 제한은 두지 않는다 - 제한은 문구가 아니라 사용자의 판단에 맡긴다.
- */
+/** 올해의 목표 제목 입력. 목표 설정과 설정 화면이 같은 것을 쓴다. */
 export function GoalTitleInput({ value, onChangeText, colors, placeholder, compact }: Props) {
   return (
     <TextInput
@@ -23,6 +22,7 @@ export function GoalTitleInput({ value, onChangeText, colors, placeholder, compa
       placeholder={placeholder}
       placeholderTextColor={colors.faint}
       multiline
+      maxLength={GOAL_TITLE_MAX_LENGTH}
       style={[
         styles.input,
         compact ? styles.compact : styles.regular,

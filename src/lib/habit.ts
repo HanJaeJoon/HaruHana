@@ -3,6 +3,14 @@
 
 import type { Area, ArchivedGoal, DailyRecord, Goal, Outcome } from './model';
 
+/** 목표 제목의 최대 글자 수. 입력 칸의 maxLength 와 저장 직전 자르기가 같은 값을 쓴다. */
+export const GOAL_TITLE_MAX_LENGTH = 40;
+
+/** 입력 칸 제한을 거치지 않은 값(붙여넣기, 예전 초안)도 저장 전에 같은 길이로 맞춘다. */
+export function normalizeGoalTitle(title: string): string {
+  return title.trim().slice(0, GOAL_TITLE_MAX_LENGTH).trim();
+}
+
 export function newGoal(input: {
   title: string;
   oneThing: string;
@@ -11,7 +19,7 @@ export function newGoal(input: {
 }): Goal {
   const goal: Goal = {
     id: newGoalId(),
-    title: input.title.trim(),
+    title: normalizeGoalTitle(input.title),
     oneThing: input.oneThing.trim(),
     createdAt: input.createdAt,
   };
@@ -27,7 +35,7 @@ export function newGoal(input: {
  */
 export function editGoal(goal: Goal, input: { title: string; area?: Area }): Goal {
   const { area: _dropped, ...rest } = goal;
-  const next: Goal = { ...rest, title: input.title.trim() };
+  const next: Goal = { ...rest, title: normalizeGoalTitle(input.title) };
   return input.area ? { ...next, area: input.area } : next;
 }
 
