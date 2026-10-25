@@ -1,6 +1,6 @@
 import { Redirect, useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Linking, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Linking, Platform, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { showPrivacyOptions, usePrivacyOptionsRequired } from '@/kit/ads/consent';
 import { useThemeColors } from '@/kit/theme';
@@ -163,6 +163,21 @@ export default function Settings() {
             variant={settings.notificationTime === null ? 'filled' : 'outline'}
           />
         </View>
+        {settings.notificationTime !== null ? (
+          <>
+            <Text style={[styles.hint, { color: colors.faint }]}>{t('settingsNotificationBatteryHint')}</Text>
+            {/* 배터리 항목으로 바로 가는 공개 인텐트가 없어 앱 정보 화면을 연다. */}
+            {Platform.OS === 'android' ? (
+              <PressButton
+                label={t('settingsNotificationOpenBattery')}
+                onPress={() => void Linking.openSettings()}
+                colors={colors}
+                accent={accent}
+                variant="outline"
+              />
+            ) : null}
+          </>
+        ) : null}
       </View>
 
       <View style={styles.section}>
