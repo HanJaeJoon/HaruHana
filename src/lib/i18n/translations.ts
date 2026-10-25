@@ -96,7 +96,7 @@ type Strings = {
   todayReminderDenied: string;
   settingsNotificationOpenSettings: string;
   settingsNotificationBatteryHint: string;
-  settingsNotificationOpenBattery: string;
+  settingsNotificationOpenAppInfo: string;
   settingsAdsSection: string;
   settingsAdsPrivacy: string;
   settingsPrivacyPolicy: string;
@@ -188,8 +188,8 @@ export const translations: Record<AppLocale, Strings> = {
     settingsGoalSave: '목표 저장',
     settingsNotificationBlocked: '기기에서 알림이 차단돼 있어 예약되지 않았습니다. 기기 설정에서 알림을 켜 주세요.',
     settingsNotificationOpenSettings: '기기 설정 열기',
-    settingsNotificationBatteryHint: "알림이 안 오면 배터리 설정에서 이 앱을 '제한 없음'으로 두세요. 절전으로 앱이 멈추면 예약이 지워집니다.",
-    settingsNotificationOpenBattery: '배터리 설정 열기',
+    settingsNotificationBatteryHint: "알림이 안 오면 앱 정보 > 배터리에서 이 앱을 '제한 없음'으로 두세요. 절전으로 앱이 멈추면 예약이 지워집니다.",
+    settingsNotificationOpenAppInfo: '앱 정보 열기',
     settingsNotificationUnavailable: '알림을 예약하지 못했습니다. 기기 설정에서 이 앱의 알림이 켜져 있는지 확인해 주세요.',
     settingsNotificationUnsupported: '이 실행 환경(Expo Go / 웹)에서는 알림을 예약할 수 없습니다.',
     todayReminderDenied: '알림 권한이 꺼져 있어 알림이 오지 않아요. 설정에서 켤 수 있어요.',
@@ -282,8 +282,8 @@ export const translations: Record<AppLocale, Strings> = {
     settingsGoalSave: 'Save goal',
     settingsNotificationBlocked: 'Notifications are blocked on this device, so nothing is scheduled. Turn them on in device settings.',
     settingsNotificationOpenSettings: 'Open device settings',
-    settingsNotificationBatteryHint: "If reminders stop arriving, set this app's battery usage to 'Unrestricted'. When battery saving stops the app, the schedule is cleared.",
-    settingsNotificationOpenBattery: 'Open battery settings',
+    settingsNotificationBatteryHint: "If reminders stop arriving, open App info > Battery and set this app to 'Unrestricted'. When battery saving stops the app, the schedule is cleared.",
+    settingsNotificationOpenAppInfo: 'Open app info',
     settingsNotificationUnavailable: 'The reminder could not be scheduled. Check that notifications for this app are on in device settings.',
     settingsNotificationUnsupported: 'Reminders cannot be scheduled in this environment (Expo Go / web).',
     todayReminderDenied: 'Notification permission is off, so reminders will not arrive. You can turn it on in Settings.',

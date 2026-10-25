@@ -163,19 +163,17 @@ export default function Settings() {
             variant={settings.notificationTime === null ? 'filled' : 'outline'}
           />
         </View>
-        {settings.notificationTime !== null ? (
+        {/* 배터리 항목으로 바로 가는 공개 인텐트가 없어 앱 정보 화면을 연다. */}
+        {settings.notificationTime !== null && Platform.OS === 'android' ? (
           <>
             <Text style={[styles.hint, { color: colors.faint }]}>{t('settingsNotificationBatteryHint')}</Text>
-            {/* 배터리 항목으로 바로 가는 공개 인텐트가 없어 앱 정보 화면을 연다. */}
-            {Platform.OS === 'android' ? (
-              <PressButton
-                label={t('settingsNotificationOpenBattery')}
-                onPress={() => void Linking.openSettings()}
-                colors={colors}
-                accent={accent}
-                variant="outline"
-              />
-            ) : null}
+            <PressButton
+              label={t('settingsNotificationOpenAppInfo')}
+              onPress={() => void Linking.openSettings()}
+              colors={colors}
+              accent={accent}
+              variant="outline"
+            />
           </>
         ) : null}
       </View>
