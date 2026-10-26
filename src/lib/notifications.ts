@@ -123,6 +123,18 @@ export async function requestReminderPermission(): Promise<PermissionResult | 'u
   }
 }
 
+/**
+ * 설정의 배터리 안내 문구. Android 14 이상은 SCHEDULE_EXACT_ALARM 이 기본 거부라
+ * 허용하지 않으면 1시간 창의 비정확 알람이 되므로 그 토글 안내를 덧붙인다.
+ */
+export function batteryHint(): string {
+  const hint = t('settingsNotificationBatteryHint');
+  if (Platform.OS === 'android' && Number(Platform.Version) >= 34) {
+    return `${hint} ${t('settingsNotificationExactAlarmHint')}`;
+  }
+  return hint;
+}
+
 function failureResult(): 'unsupported' | 'unavailable' {
   return Platform.OS === 'web' || isRunningInExpoGo() ? 'unsupported' : 'unavailable';
 }

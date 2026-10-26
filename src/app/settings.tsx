@@ -9,6 +9,7 @@ import { THEME_OVERRIDES, useAccent } from '@/lib/branding';
 import { useHabit } from '@/lib/habitContext';
 import { t } from '@/lib/i18n';
 import { isTimeString, type Area, type Outcome } from '@/lib/model';
+import { batteryHint } from '@/lib/notifications';
 import { useToday } from '@/lib/useToday';
 
 import { AreaPicker } from '@/components/AreaPicker';
@@ -166,7 +167,7 @@ export default function Settings() {
         {/* 배터리 항목으로 바로 가는 공개 인텐트가 없어 앱 정보 화면을 연다. */}
         {settings.notificationTime !== null && Platform.OS === 'android' ? (
           <>
-            <Text style={[styles.hint, { color: colors.faint }]}>{t('settingsNotificationBatteryHint')}</Text>
+            <Text style={[styles.hint, { color: colors.faint }]}>{batteryHint()}</Text>
             <PressButton
               label={t('settingsNotificationOpenAppInfo')}
               onPress={() => void Linking.openSettings()}

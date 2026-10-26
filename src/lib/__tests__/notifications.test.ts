@@ -5,7 +5,8 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 
-import { requestReminderPermission, syncDailyReminder } from '../notifications';
+import { t } from '../i18n';
+import { batteryHint, requestReminderPermission, syncDailyReminder } from '../notifications';
 
 const mockIsRunningInExpoGo = jest.fn(() => false);
 jest.mock('expo', () => ({ isRunningInExpoGo: () => mockIsRunningInExpoGo() }));
@@ -189,6 +190,31 @@ describe('requestReminderPermission', () => {
 
     expect(mocked.setNotificationChannelAsync.mock.invocationCallOrder[0]).toBeLessThan(
       mocked.requestPermissionsAsync.mock.invocationCallOrder[0]
+    );
+  });
+});
+
+describe('batteryHint', () => {
+  function onAndroid(version: number, run: () => void) {
+    const os = Platform.OS;
+    const ver = Platform.Version;
+    Object.defineProperty(Platform, 'OS', { value: 'android', configurable: true });
+    Object.defineProperty(Platform, 'Version', { value: version, configurable: true });
+    try {
+      run();
+    } finally {
+      Object.defineProperty(Platform, 'OS', { value: os, configurable: true });
+      Object.defineProperty(Platform, 'Version', { value: ver, configurable: true });
+    }
+  }
+
+  it('Android 14 미만은 배터리 안내만 준다', () => {
+    onAndroid(33, () => expect(batteryHint()).toBe(t('settingsNotificationBatteryHint')));
+  });
+
+  it('Android 14 이상은 알람 및 리마인더 허용 안내를 덧붙인다', () => {
+    onAndroid(34, () =>
+      expect(batteryHint()).toBe(`${t('settingsNotificationBatteryHint')} ${t('settingsNotificationExactAlarmHint')}`)
     );
   });
 });
