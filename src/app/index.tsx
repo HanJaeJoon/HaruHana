@@ -1,5 +1,5 @@
 import { Redirect } from 'expo-router';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { useThemeColors } from '@/kit/theme';
 
@@ -67,7 +67,14 @@ export default function Today() {
       )}
 
       {reminderDenied && (
-        <Text style={[styles.density, { color: colors.subtext }]}>{t('todayReminderDenied')}</Text>
+        <Text
+          onPress={() => void Linking.openSettings()}
+          accessibilityRole="button"
+          accessibilityHint={t('settingsNotificationOpenAppInfo')}
+          style={[styles.density, { color: colors.subtext }]}
+        >
+          {t('todayReminderDenied')}
+        </Text>
       )}
 
       <View style={styles.goalBlock}>
