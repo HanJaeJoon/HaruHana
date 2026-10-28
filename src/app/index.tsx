@@ -71,7 +71,7 @@ export default function Today() {
           onPress={() => void Linking.openSettings()}
           accessibilityRole="button"
           accessibilityHint={t('settingsNotificationOpenAppInfo')}
-          style={[styles.density, { color: colors.subtext }]}
+          style={[styles.density, styles.link, { color: colors.subtext }]}
         >
           {t('todayReminderDenied')}
         </Text>
@@ -156,5 +156,8 @@ const styles = StyleSheet.create({
   },
   density: {
     fontSize: 13,
+  },
+  link: {
+    textDecorationLine: 'underline',
   },
 });

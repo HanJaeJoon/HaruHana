@@ -1,4 +1,4 @@
-import { Linking, Text } from 'react-native';
+import { Linking, StyleSheet, Text } from 'react-native';
 import { act, create, type ReactTestRenderer } from 'react-test-renderer';
 
 import Today from '@/app/index';
@@ -28,6 +28,7 @@ test('알림 거부 안내를 누르면 앱 정보 화면을 연다', async () =
     .findAllByType(Text)
     .find((node) => node.props.children === t('todayReminderDenied'));
   expect(notice?.props.accessibilityRole).toBe('button');
+  expect(StyleSheet.flatten(notice?.props.style).textDecorationLine).toBe('underline');
   act(() => notice!.props.onPress());
   expect(openSettings).toHaveBeenCalledTimes(1);
 });
