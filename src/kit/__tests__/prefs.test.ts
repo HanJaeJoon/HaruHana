@@ -33,8 +33,18 @@ describe('createPrefs', () => {
     expect(await prefs.load()).toBeNull();
   });
 
-  it('없는 값을 remove 해도 실패하지 않는다', async () => {
-    await expect(prefs.remove()).resolves.toBeUndefined();
+  it('remove 가 성공하면 true를 반환한다', async () => {
+    await prefs.save({ name: 'a', count: 1 });
+    expect(await prefs.remove()).toBe(true);
+  });
+
+  it('없는 값을 remove 해도 실패하지 않고 true를 반환한다', async () => {
+    expect(await prefs.remove()).toBe(true);
+  });
+
+  it('저장소 삭제가 실패하면 false를 반환한다', async () => {
+    jest.spyOn(AsyncStorage, 'removeItem').mockRejectedValueOnce(new Error('fail'));
+    expect(await prefs.remove()).toBe(false);
   });
 
   it('검증에 실패하는 값이 저장돼 있으면 null을 반환한다', async () => {
